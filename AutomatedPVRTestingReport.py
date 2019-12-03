@@ -57,6 +57,7 @@ class SanityData:
         self.enableConfiguration = 0
         self.devices = 0 
         self.skipTokenError = 0 
+        self.DVREmptyData = 0
     def getOriginalAirDate(self): 
         return self.originalAirDate
     def getEnableConfiguration(self): 
@@ -79,7 +80,8 @@ class SanityData:
         return self.fake_generic
     def getDevices(self): 
         return self.devices
-    
+    def getDVREmptyData(self): 
+        return self.DVREmptyData
     def getSkipTokenError(self): 
         return self.skipTokenError
     
@@ -107,6 +109,8 @@ class SanityData:
         self.outOfSync += outOfSync
     def setfake_generic(self,fake_generic): 
         self.fake_generic += fake_generic
+    def setDVREmptyData(self,dvrData): 
+        self.DVREmptyData += dvrData 
         
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
@@ -416,7 +420,6 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
             originalAir_b = brec['originalAirDate']
             time_b = brec['Time'] 
             seriesID_b = brec['seriesID']
-            
             
             if seriesID_a == seriesID_b and glfProgramID_b == glfProgramID_a and glfProgramID_b != "None" and glfProgramID_a:    
                 if state_b == "Scheduled" and state_a == "Cancelled" and timeDelta(time_b,time_a) > 0:  
@@ -739,6 +742,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
                     innerRow['seriesID'] = seriesID
                     innerRow['seriesExtID'] = seriesExtID
                     innerRow['originalAirDate'] = originalAirDate 
+                    innerRow['recordingID'] = eachRecGroup['id']
                     #print(originalAirDate)
                     if seriesObjState == "Scheduled": 
                         schedCount += 1
@@ -884,8 +888,8 @@ def processResults(sanityData,featureGroupLen):
     printTestCase("Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]", valIndRecs_program)
     #printTestCase("Test Case 3: Number of Occurences of missing image data ", valImages_program)
     printTestCase("Test Case 3: Number of Occurences of unmatched series IDs [MFR-9116] ", valDVRIds_program)
-    printTestCase("Test Case 4: Number of Occurences of invalid account profile configurations (Ingress or Egress is not sent) [MFR-9409]", valAccountConfiguration_program) 
-    printTestCase("Test Case 5: Number of Occurences of empty prog details data [MFR-8192]",progDetails)
+    printTestCase("Test Case 4: Number of Occurences of invalid account profile configurations (Ingress or Egress is not set) [MFR-9409]", valAccountConfiguration_program) 
+    printTestCase("Test Case 5: Number of Occurences of empty program details data [MFR-8192]",progDetails)
     printTestCase("Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]", outOfSync)
     printTestCase("Test Case 7: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
     if perc_enableConfig > 2: 
@@ -894,15 +898,16 @@ def processResults(sanityData,featureGroupLen):
     else: 
         printTestCase("Test Case 8: Accounts that have been accidently disabled",number = None) 
     if perc_devices > 2: 
-        printTestCase("Test Case 9: Accounts that have had their devices their removed", devices)
+        printTestCase("Test Case 9: Accounts that have accidently had their devices their removed", devices)
     else: 
-        printTestCase("Test Case 9: Accounts that have had their devices their removed", number = None) 
+        printTestCase("Test Case 9: Accounts that have accidently had their devices their removed", number = None) 
     try: 
         printTestCase("Test Case 10: Number of occurences of invalid original air dates [MFR-9472]", results.count(0))
     except: 
         printTestCase("Test Case 10: Number of occurences of invalid original air dates[MFR-9472]", 0) 
         
     printTestCase("Test Case 11: Number of occurences of invalid skip tokens [MFR-6261]",  skipTokenError)
+    printTestCase("Test Case 12: Number of occurences of empty DVR Data ", sanityData.getDVREmptyData())
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
     #def checkRecordedStates(OSSRecs, DVRRECS): 
     
@@ -926,6 +931,7 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
             ossProgId = eachOSS['programDetailsGLF'] 
             ossState = eachOSS['Series State'] 
             startTime = eachOSS['Time'] 
+            OSS_id = eachOSS['recordingID'] 
             
             time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(' ', 'T') + 'Z'
             delta = timeDelta(startTime, time_now)
@@ -934,15 +940,19 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
             for eachDVR in DVRRECS: 
                 dvrProgId = eachDVR['programDetailsGLF'] 
                 dvrState = eachDVR['Series State']
+                dvr_id = eachDVR['recordingID'] 
                 
-                if dvrProgId == ossProgId and dvrState == ossState:
+                if dvr_id == OSS_id and dvrState == ossState:
                     #Found that there is a match 
                     flag = True
+                    if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "": 
+                        sanityData.setDVREmptyData(1)
+                        print("This Show is Empty "+ eachOSS['Show'] + " " + startTime + " on channel " + eachOSS['Channel'] ) 
             if flag == False and ossState == 'Recorded': 
                 #Then there is something wrong 
                 if abs(delta)< 90 and abs(delta) > 0.1: 
                     sanityData.setDVROutOfSync(1) 
-                    #print("Out of Sync!!! ", eachAccount)  
+                    print("Out of Sync!!! " + eachAccount + " " + ossProgId)  
                     
         #checkRecordedStates(OSSRecs, DVRRECS)  #Now we check to see that the recorded counts for the assets matches each other  
         #print(strr) 
@@ -1050,7 +1060,6 @@ def checkAccountSettings(accountName,env,sanityData):
                 count_band += 1
         elif enable == False: 
             sanityData.setEnableConfiguration(1) 
-        
         try: 
             skip = rj['skipToken'] 
         except: 
@@ -1098,7 +1107,7 @@ def checkDeviceSettings(accountName,env,sanityData):
             break 
             
     
-envs = ['prodb']
+envs = ['proda']
 unmatchedProgramCount = 0 
 
 sanityData = SanityData() #Class to hold all of the sanity data 
@@ -1118,6 +1127,7 @@ for env in envs:
         try:
             OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData)
         except: 
+            OSSRecs = None 
             pass 
         
         try: 
@@ -1131,7 +1141,8 @@ for env in envs:
         
         #Check to see if any of the DVR PRoxy Definitions are okay 
         try: 
-            performDVRProxySanity(eachAccount, OSSRecs,sanityData) 
+            if OSSRecs != None: 
+                performDVRProxySanity(eachAccount, OSSRecs,sanityData) 
         except:
             pass
         #try: 
