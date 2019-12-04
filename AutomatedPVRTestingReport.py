@@ -84,33 +84,43 @@ class SanityData:
         return self.DVREmptyData
     def getSkipTokenError(self): 
         return self.skipTokenError
-    
     def setSkipTokenError(self,skipToken): 
         self.skipTokenError += skipToken
     def setDevices(self,devices): 
         self.devices += devices
     def setEnableConfiguration(self,enableConfiguration): 
-        self.enableConfiguration += enableConfiguration
+        if enableConfiguration != None: 
+            self.enableConfiguration += enableConfiguration
     def setOriginalAirDate(self,originalAirDate): 
-        self.originalAirDate.append(originalAirDate) 
+        if originalAirDate != None: 
+            self.originalAirDate.append(originalAirDate) 
     def setValMissingIDS(self, valMissingIDs): 
-        self.valMissingIDs_program += valMissingIDs
+        if valMissingIDs != None: 
+            self.valMissingIDs_program += valMissingIDs
     def setValIndRecs(self,valIndRecs):
-        self.valIndRecs_program += valIndRecs
+        if valIndRecs != None: 
+            self.valIndRecs_program += valIndRecs
     def setValImages(self,valImages):
-        self.valImages_program += valImages 
+        if valImages != None: 
+            self.valImages_program += valImages 
     def setValDVRIds(self,valDVRIds): 
-        self.valDVRIds_program += valDVRIds
+        if valDVRIds != None: 
+            self.valDVRIds_program += valDVRIds
     def setAccountConfigurationVal(self, accountConfigurationVal): 
-        self.accountConfigurationVal_program += accountConfigurationVal
+        if accountConfigurationVal != None: 
+            self.accountConfigurationVal_program += accountConfigurationVal
     def setProgDetails(self,progDetails): 
-        self.progDetails += progDetails
+        if progDetails != None: 
+            self.progDetails += progDetails
     def setDVROutOfSync(self,outOfSync): 
-        self.outOfSync += outOfSync
+        if outOfSync != None: 
+            self.outOfSync += outOfSync
     def setfake_generic(self,fake_generic): 
-        self.fake_generic += fake_generic
+        if fake_generic != None: 
+            self.fake_generic += fake_generic
     def setDVREmptyData(self,dvrData): 
-        self.DVREmptyData += dvrData 
+        if dvrData != None: 
+            self.DVREmptyData += dvrData 
         
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
@@ -471,6 +481,7 @@ def checkSeriesValidation(recs,individualRecordings,seriesDetailObj,accountName,
     #valCheckIndRecordings_GLF(individualRecordings)
     
    # sanityData.setAll(valMissingIDs, valIndRecs,valImages,valDVRIds) 
+   
     sanityData.setValMissingIDS(valMissingIDs)
     sanityData.setValIndRecs(valIndRecs) 
     sanityData.setValImages(valImages) 
@@ -867,6 +878,7 @@ def processResults(sanityData,featureGroupLen):
     fake_gen = sanityData.getFake_generic()
     enableConfig = sanityData.getEnableConfiguration()
     devices = sanityData.getDevices() 
+    
     skipTokenError = sanityData.getSkipTokenError() 
     perc_devices = 100 * devices/featureGroupLen 
     perc_enableConfig= 100 *enableConfig/featureGroupLen
@@ -877,9 +889,6 @@ def processResults(sanityData,featureGroupLen):
         DonutChartOfResults(results)
     except: 
         results = 0
-    
-    
-    
     
     print("Summary of Results")
     
@@ -910,12 +919,31 @@ def processResults(sanityData,featureGroupLen):
     printTestCase("Test Case 12: Number of occurences of empty DVR Data ", sanityData.getDVREmptyData())
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
     #def checkRecordedStates(OSSRecs, DVRRECS): 
-    
-    
+
+def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName): 
+    for eachDVR in DVRRECS: 
+        
+        dvrProgId = eachDVR['programDetailsGLF'] 
+        dvr_id = eachDVR['recordingID'] 
+        dvr_time = eachDVR['Time']
+        #print(dvrProgId) 
+        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None': 
+            sanityData.setDVREmptyData(1) 
+            for eachOSS in OSSRecs: 
+                if dvr_id == eachOSS['recordingID']: 
+                    showName = eachOSS['Show'] 
+                    startTime = eachOSS['Time']
+                    channelNumber = eachOSS['Channel Number'] 
+                    break
+            try: 
+                print("This Show is Empty "+ showName + " " + startTime + " on channel " + str(channelNumber) + " on " + accountName)
+            except: 
+                pass
 def performDVRProxySanity(eachAccount, OSSRecs,sanityData): 
     #Perform a sanity based on the recordings of the OSS Definitions
     
     DVRRECS = mf_getRecordings('DVRPROXY',eachAccount,env,sanityData)
+    checkDVREmpty(DVRRECS,OSSRecs,sanityData,eachAccount)
     #compareRecs(DVRRECS,OSSRecs) 
     try:
         DVRLength = len(DVRRECS)
@@ -941,16 +969,15 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
                 dvrProgId = eachDVR['programDetailsGLF'] 
                 dvrState = eachDVR['Series State']
                 dvr_id = eachDVR['recordingID'] 
+                #print(dvrProgId) 
                 
                 if dvr_id == OSS_id and dvrState == ossState:
                     #Found that there is a match 
                     flag = True
-                    if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "": 
-                        sanityData.setDVREmptyData(1)
-                        print("This Show is Empty "+ eachOSS['Show'] + " " + startTime + " on channel " + eachOSS['Channel'] ) 
+                    
             if flag == False and ossState == 'Recorded': 
                 #Then there is something wrong 
-                if abs(delta)< 90 and abs(delta) > 0.1: 
+                if abs(delta)< 90 and abs(delta) > 0.06: 
                     sanityData.setDVROutOfSync(1) 
                     print("Out of Sync!!! " + eachAccount + " " + ossProgId)  
                     
@@ -1080,6 +1107,7 @@ def checkDeviceSettings(accountName,env,sanityData):
     tok = get_token('OSS',env, list())
     
     session = requests.Session()
+    session.headers = tok
     while True:
         url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/devices'
         if len(skip) > 0: 
@@ -1093,8 +1121,10 @@ def checkDeviceSettings(accountName,env,sanityData):
         
         if re.match('84',accountName) == None: 
             return
-        deviceIDs = len(rj['deviceIds']) 
-        
+        try: 
+            deviceIDs = len(rj['deviceIds']) 
+        except: 
+            deviceIDs = 0 
         if deviceIDs == 0: 
             sanityData.setDevices(1) 
     
@@ -1107,7 +1137,7 @@ def checkDeviceSettings(accountName,env,sanityData):
             break 
             
     
-envs = ['proda']
+envs = ['prodc']
 unmatchedProgramCount = 0 
 
 sanityData = SanityData() #Class to hold all of the sanity data 
@@ -1120,7 +1150,7 @@ for env in envs:
     _feature_group = "NAPA_TRIAL"
     accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group)    
     
-    #accountsInFeatureGroup = ['8452000000000059']
+    #accountsInFeatureGroup = ['8455700609700529']
     featureGroupLen = len(accountsInFeatureGroup)
     for eachAccount in accountsInFeatureGroup:
         
