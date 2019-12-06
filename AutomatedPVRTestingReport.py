@@ -596,7 +596,7 @@ def testSkipToken(typeCALL,accountName,env,sanityData):
     except: 
         #Otherwise, this is an error and we have an error with this account 
         sanityData.setSkipTokenError(1)
-        print("Invalid Skip Token ", rj) 
+        print("Invalid Skip Token "  + rj + " " + accountName)  
         return 
     
 def mf_getRecordings(typeCALL,accountName,env,sanityData): 
@@ -838,7 +838,7 @@ def printTestCase(sentence, number):
 
 def processResults(sanityData,featureGroupLen): 
     #Process the accounts 
-    
+    js = []
     '''
     valMissingIDs_program = 0 
     valIndRecs_program = 0
@@ -894,16 +894,30 @@ def processResults(sanityData,featureGroupLen):
     
     print("--------------------------------------------------------------------------------")
     printTestCase("Test Case 1: Number of Occurences of missing sections in JSON [MFR-8980]", valMissingIDs_program)
+    js.append({"Test Case 1: Number of Occurences of missing sections in JSON [MFR-8980]": valMissingIDs_program})
+    
     printTestCase("Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]", valIndRecs_program)
+    js.append({"Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]": valIndRecs_program})
+    
     #printTestCase("Test Case 3: Number of Occurences of missing image data ", valImages_program)
     printTestCase("Test Case 3: Number of Occurences of unmatched series IDs [MFR-9116] ", valDVRIds_program)
+    js.append({"Test Case 3: Number of Occurences of unmatched series IDs [MFR-9116]": valDVRIds_program})
+    
     printTestCase("Test Case 4: Number of Occurences of invalid account profile configurations (Ingress or Egress is not set) [MFR-9409]", valAccountConfiguration_program) 
+    js.append({"Test Case 4: Number of Occurences of invalid account profile configurations (Ingress or Egress is not set) [MFR-9409]": valAccountConfiguration_program})
+    
     printTestCase("Test Case 5: Number of Occurences of empty program details data [MFR-8192]",progDetails)
+    js.append({"Test Case 5: Number of Occurences of empty program details data [MFR-8192]": progDetails})
+    
     printTestCase("Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]", outOfSync)
+    js.append({"Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]": progDetails})
+    
     printTestCase("Test Case 7: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
     if perc_enableConfig > 2: 
         #Then 
         printTestCase("Test Case 8: Accounts that have been accidently disabled",enableConfig)
+        printTestCase("Test Case 8: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
+        
     else: 
         printTestCase("Test Case 8: Accounts that have been accidently disabled",number = None) 
     if perc_devices > 2: 
@@ -917,6 +931,7 @@ def processResults(sanityData,featureGroupLen):
         
     printTestCase("Test Case 11: Number of occurences of invalid skip tokens [MFR-6261]",  skipTokenError)
     printTestCase("Test Case 12: Number of occurences of empty DVR Data ", sanityData.getDVREmptyData())
+    
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
     #def checkRecordedStates(OSSRecs, DVRRECS): 
 
@@ -927,7 +942,7 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
         dvr_id = eachDVR['recordingID'] 
         dvr_time = eachDVR['Time']
         #print(dvrProgId) 
-        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None': 
+        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName): 
             sanityData.setDVREmptyData(1) 
             for eachOSS in OSSRecs: 
                 if dvr_id == eachOSS['recordingID']: 
@@ -1136,48 +1151,49 @@ def checkDeviceSettings(accountName,env,sanityData):
         if skip == None: 
             break 
             
+def main(): 
+    testResults = {} 
+    envs = ['prodc']
+    unmatchedProgramCount = 0 
     
-envs = ['prodc']
-unmatchedProgramCount = 0 
-
-sanityData = SanityData() #Class to hold all of the sanity data 
-
-for env in envs: 
-    accounts_Test_OSS = [] 
-    accounts_Test_DVRPROXY = [] 
-    print("Running test cases for", env)
+    sanityData = SanityData() #Class to hold all of the sanity data 
     
-    _feature_group = "NAPA_TRIAL"
-    accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group)    
-    
-    #accountsInFeatureGroup = ['8455700609700529']
-    featureGroupLen = len(accountsInFeatureGroup)
-    for eachAccount in accountsInFeatureGroup:
+    for env in envs: 
+        accounts_Test_OSS = [] 
+        accounts_Test_DVRPROXY = [] 
+        print("Running test cases for", env)
         
-        try:
-            OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData)
-        except: 
-            OSSRecs = None 
-            pass 
+        _feature_group = "NAPA_TRIAL"
+        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group)    
         
-        try: 
-            accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
-        except: 
-            pass 
-        try: 
-            checkDeviceSettings(eachAccount,env,sanityData)
-        except: 
-            pass 
+        #accountsInFeatureGroup = ['8455700609700529']
+        featureGroupLen = len(accountsInFeatureGroup)
+        for eachAccount in accountsInFeatureGroup:
+            
+            try:
+                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData)
+            except: 
+                OSSRecs = None 
+                pass 
+            
+            try: 
+                accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
+            except: 
+                pass 
+            try: 
+                checkDeviceSettings(eachAccount,env,sanityData)
+            except: 
+                pass 
+            
+            #Check to see if any of the DVR PRoxy Definitions are okay 
+            try: 
+                if OSSRecs != None: 
+                    performDVRProxySanity(eachAccount, OSSRecs,sanityData) 
+            except:
+                pass
+            #try: 
+                #if env == 'proda': 
+            
+        processResults(sanityData,featureGroupLen)
         
-        #Check to see if any of the DVR PRoxy Definitions are okay 
-        try: 
-            if OSSRecs != None: 
-                performDVRProxySanity(eachAccount, OSSRecs,sanityData) 
-        except:
-            pass
-        #try: 
-            #if env == 'proda': 
-        
-    processResults(sanityData,featureGroupLen)
-    
-    print("\n")
+        print("\n")
