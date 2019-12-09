@@ -789,8 +789,10 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
                         schedCount += 1
                         time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(' ', 'T') + 'Z'
                         if timeDelta(startUTC,time_now) < 0: 
-                            sanityData.setfake_generic(convertToString(programDetailsID,programDetailsGeneric,accountName,showName,programDetailsGLF))
-                   
+                            try: 
+                                sanityData.setfake_generic(convertToString(programDetailsID,programDetailsGeneric,accountName,showName,programDetailsGLF))
+                            except: 
+                                pass 
                         totalSched += schedCount
                     elif seriesObjState == "Recorded": 
                         recCount += 1 
@@ -984,6 +986,7 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
         dvrProgId = eachDVR['programDetailsGLF'] 
         dvr_id = eachDVR['recordingID'] 
         dvr_time = eachDVR['Time']
+        print(eachDVR)
         #print(dvrProgId) 
         if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName): 
             sanityData.setDVREmptyData(1) 
@@ -1230,8 +1233,8 @@ def testAPICall(accountName,env,sanityData):
         
 def main(): 
     testResults = [] 
-    envs = ['proda']
-    DVRVersion = "S96" 
+    envs = ['prodc']
+    DVRVersion = "S116" 
     unmatchedProgramCount = 0 
     
     sanityData = SanityData() #Class to hold all of the sanity data 
@@ -1248,7 +1251,7 @@ def main():
     
         #accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        accountsInFeatureGroup = ['8452000000000274']
+        accountsInFeatureGroup = ['ucclient20']
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
