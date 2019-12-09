@@ -58,6 +58,11 @@ class SanityData:
         self.devices = 0 
         self.skipTokenError = 0 
         self.DVREmptyData = 0
+        
+        self.dvr_s96 = 0 
+        self.dvr_s108 = 0 
+        self.dvr_s116 = 0
+        self.oss = 0
     def getOriginalAirDate(self): 
         return self.originalAirDate
     def getEnableConfiguration(self): 
@@ -121,7 +126,20 @@ class SanityData:
     def setDVREmptyData(self,dvrData): 
         if dvrData != None: 
             self.DVREmptyData += dvrData 
+    def setAPIResponse(self,dvr_s96,dvr_s108,dvr_s116,oss): 
+        self.dvr_s96 += dvr_s96
+        self.dvr_s108 += dvr_s108
+        self.dvr_s116 += dvr_s116
+        self.oss += oss
         
+    def getDVR_S96(self): 
+        return self.dvr_s96 
+    def getDVR_S108(self): 
+        return self.dvr_s108 
+    def getDVR_s116(self): 
+        return self.dvr_s116 
+    def getOSS(self): 
+        return self.oss
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
     # open token file and check expiry
@@ -575,7 +593,7 @@ def convertToString(seriesExtID,programGeneric,accountName,showName,programDetai
     
     return 0 #Then there is nothing wrong with this         
 
-def testSkipToken(typeCALL,accountName,env,sanityData): 
+def testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion): 
     toek = get_token(typeCALL,env, list())                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     session = requests.Session()
     session.headers = toek
@@ -583,7 +601,7 @@ def testSkipToken(typeCALL,accountName,env,sanityData):
         url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/recording-definitions/?$top=1&$skipToken='
     elif typeCALL == 'DVRPROXY': 
         #url = 'https://appgw-client.'+env+'.bce.tv3cloud.com/S96/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
-        url= 'https://appgw-client.'+env+'.bce.tv3cloud.com/S96/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top=1&$skipToken='
+        url= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+DVRVersion+'/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top=1&$skipToken='
         
     try:
         response = session.get(url)
@@ -599,7 +617,7 @@ def testSkipToken(typeCALL,accountName,env,sanityData):
         print("Invalid Skip Token "  + rj + " " + accountName)  
         return 
     
-def mf_getRecordings(typeCALL,accountName,env,sanityData): 
+def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion): 
                            
     skipToken = ""
     totalRec = 0                                                                                                                                                                                                                                                                                                                               
@@ -625,7 +643,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
             
         elif typeCALL == 'DVRPROXY': 
             #url = 'https://appgw-client.'+env+'.bce.tv3cloud.com/S96/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
-            url= 'https://appgw-client.'+env+'.bce.tv3cloud.com/S96/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+            url= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+DVRVersion+'/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
           
         try: 
             response = session.get(url)
@@ -643,7 +661,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
             pass
         
         
-        testSkipToken(typeCALL,accountName,env,sanityData) 
+        testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion) 
     
         try: 
             skipToken = rj['skipToken']
@@ -672,6 +690,10 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
                 seriesNameObj = seriesDetailObj['name']
             except: 
                 seriesNameObj = None 
+            try: 
+                glfStationId  = eachRec['stationId']
+            except: 
+                glfStationId = ""
             
             try: 
                 seriesExtID = seriesDetailObj['id'] 
@@ -754,6 +776,9 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
                     innerRow['seriesExtID'] = seriesExtID
                     innerRow['originalAirDate'] = originalAirDate 
                     innerRow['recordingID'] = eachRecGroup['id']
+                    innerRow['glfStationID'] = glfStationId
+                    #print(glfStationId)
+                    
                     #print(originalAirDate)
                     if seriesObjState == "Scheduled": 
                         schedCount += 1
@@ -774,8 +799,8 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData):
                         cancelledCount += 1
                      
                     #if showName == 'General Hospital' or showName == 'Family Feud': 
-                        #print(showName + ' ' + str(channelNumber))
-                        #print(programDetailsGLF)
+                        #print(showName + ' ' + str(channelNumber
+                        #print(programDetailsGLF)))
                     #if isPastScheduled(startUTC) and seriesObjState == "Scheduled": 
                         #pastScheduled += 1
                         
@@ -916,21 +941,31 @@ def processResults(sanityData,featureGroupLen):
     if perc_enableConfig > 2: 
         #Then 
         printTestCase("Test Case 8: Accounts that have been accidently disabled",enableConfig)
-        printTestCase("Test Case 8: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
+        js.append({"Test Case 8: Accounts that have been accidently disabled": enableConfig})
         
     else: 
         printTestCase("Test Case 8: Accounts that have been accidently disabled",number = None) 
+        js.append({"Test Case 8: Accounts that have been accidently disabled": 0})
+        
     if perc_devices > 2: 
         printTestCase("Test Case 9: Accounts that have accidently had their devices their removed", devices)
+        js.append({"Test Case 9: Accounts that have accidently had their devices their removed": devices})
     else: 
         printTestCase("Test Case 9: Accounts that have accidently had their devices their removed", number = None) 
+        js.append({"Test Case 9: Accounts that have accidently had their devices their removed": 0})
     try: 
         printTestCase("Test Case 10: Number of occurences of invalid original air dates [MFR-9472]", results.count(0))
+        js.append({"Test Case 10: Number of occurences of invalid original air dates [MFR-9472]": results.count(0)})
     except: 
         printTestCase("Test Case 10: Number of occurences of invalid original air dates[MFR-9472]", 0) 
+        js.append({"Test Case 10: Number of occurences of invalid original air dates [MFR-9472]": 0})
         
     printTestCase("Test Case 11: Number of occurences of invalid skip tokens [MFR-6261]",  skipTokenError)
+    js.append({"Test Case 11: Number of occurences of invalid skip tokens [MFR-6261]": skipTokenError})
     printTestCase("Test Case 12: Number of occurences of empty DVR Data ", sanityData.getDVREmptyData())
+    js.append({"Test Case 12: Number of occurences of empty DVR Data": sanityData.getDVREmptyData()})
+    
+    return js
     
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
     #def checkRecordedStates(OSSRecs, DVRRECS): 
@@ -989,6 +1024,8 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
                 if dvr_id == OSS_id and dvrState == ossState:
                     #Found that there is a match 
                     flag = True
+                    if eachDVR['glfStationID'] == eachOSS['glfStationID']: 
+                        print("Mismatch") 
                     
             if flag == False and ossState == 'Recorded': 
                 #Then there is something wrong 
@@ -1018,7 +1055,7 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
                 
       '''      
             
-def getAccounts_FeatureGroup(_feature_group):
+def getAccounts_FeatureGroup(_feature_group,env):
     tok = get_token('OSS',env, list())
     
     session = requests.Session()
@@ -1072,7 +1109,6 @@ def checkAccountSettings(accountName,env,sanityData):
             pass
         if accountName.find('84') == -1: 
            return
-        
             
         wanProfile = rj['wanProfile']['maxBitRate'] 
         enable = rj['enabled'] 
@@ -1150,31 +1186,69 @@ def checkDeviceSettings(accountName,env,sanityData):
         
         if skip == None: 
             break 
-            
+def testAPICall(accountName,env,sanityData): 
+    #Run API call testing 
+    dvrVersion = ['S96','S108','S116'] 
+    skipToken = ""
+    top = '100'
+    
+    #Token for the DVR Proxy API 
+    tok_dvr = get_token('DVRPROXY',env, list())
+    session_dvr = requests.Session()
+    session_dvr.headers = tok_dvr
+    
+    tok_oss = get_token("OSS", env,list())
+    session_oss = requests.Session() 
+    session_oss.headers = tok_oss 
+    
+    for eachdvr in dvrVersion: 
+        url_recordingDefinitionsDVR= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+eachdvr+'/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+          
+        #url_devices = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/devices'
+        recordingDefinitionsDVR = session_dvr.get(url_recordingDefinitionsDVR) 
+        time.sleep(10)
+        
+        #sanityData.setAPIResponse()
+        
+        #url_recordingDefinitionsOSS = session.get(url_recordingDefinitionsOSS)
+        #resp_url_devices = session.get(url_devices) 
+        
+        print("DVR Recording Definitions ", recordingDefinitionsDVR)
+    
+    url_recordingDefinitionsOSS = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
+    recordingDefinitionsOSS = session_oss.get(url_recordingDefinitionsOSS)
+    print("OSS Recording Definitions", recordingDefinitionsOSS) 
+        
 def main(): 
-    testResults = {} 
-    envs = ['prodc']
+    testResults = [] 
+    envs = ['proda']
+    DVRVersion = "S116" 
     unmatchedProgramCount = 0 
     
     sanityData = SanityData() #Class to hold all of the sanity data 
     
     for env in envs: 
-        accounts_Test_OSS = [] 
-        accounts_Test_DVRPROXY = [] 
+        #try: 
+            #testAPICall('napaclient9',env,sanityData)
+        #except: 
+            #pass
+        
         print("Running test cases for", env)
         
         _feature_group = "NAPA_TRIAL"
-        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group)    
+    
+        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        #accountsInFeatureGroup = ['8455700609700529']
+        #accountsInFeatureGroup = ['NAPACLIENT427']
         featureGroupLen = len(accountsInFeatureGroup)
+        
         for eachAccount in accountsInFeatureGroup:
             
             try:
-                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData)
+                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
             except: 
                 OSSRecs = None 
-                pass 
+                pass
             
             try: 
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
@@ -1193,7 +1267,9 @@ def main():
                 pass
             #try: 
                 #if env == 'proda': 
-            
-        processResults(sanityData,featureGroupLen)
         
+        testResults.append(processResults(sanityData,featureGroupLen))
+        print(testResults) 
         print("\n")
+    return testResults
+main() #Return the Test Results 
