@@ -132,7 +132,7 @@ class SanityData:
         self.dvr_s116 += dvr_s116
         self.oss += oss
         
-    def setDVRStationSync(self,dvrStationOutOfSync): 
+    def setdvrStationOutOfSync(self,dvrStationOutOfSync): 
         self.dvrStationOutOfSync += dvrStationOutOfSync 
     def getdvrStationOutOfSync(self): 
         return self.dvrStationOutOfSync
@@ -623,7 +623,7 @@ def testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion):
         return 
     
 def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion): 
-                           
+                   #'DVRPROXY',eachAccount,env,sanityData,dvrVersion        
     skipToken = ""
     totalRec = 0                                                                                                                                                                                                                                                                                                                               
     pastScheduled = 0 
@@ -997,10 +997,10 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
                 print("This Show is Empty "+ showName + " " + startTime + " on channel " + str(channelNumber) + " on " + accountName)
             except: 
                 pass
-def performDVRProxySanity(eachAccount, OSSRecs,sanityData): 
+def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion): 
     #Perform a sanity based on the recordings of the OSS Definitions
     
-    DVRRECS = mf_getRecordings('DVRPROXY',eachAccount,env,sanityData)
+    DVRRECS = mf_getRecordings('DVRPROXY',eachAccount,env,sanityData,dvrVersion)
     checkDVREmpty(DVRRECS,OSSRecs,sanityData,eachAccount)
     #compareRecs(DVRRECS,OSSRecs) 
     try:
@@ -1032,9 +1032,9 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
                 if dvr_id == OSS_id and dvrState == ossState:
                     #Found that there is a match 
                     flag = True
-                    if eachDVR['glfStationID'] == eachOSS['glfStationID']: 
+                    if eachDVR['glfStationID'] != eachOSS['glfStationID'] and eachDVR['glfStationID'] != '' and eachOSS['glfStationID'] != '': 
                         print("Mismatch between GLF station IDs " + eachDVR['glfStationID'] + " " + eachOSS['glfStationID']) 
-                        sanityData.getdvrStationOutOfSync(1)
+                        sanityData.setdvrStationOutOfSync(1)
                     
             if flag == False and ossState == 'Recorded': 
                 #Then there is something wrong 
@@ -1231,7 +1231,7 @@ def testAPICall(accountName,env,sanityData):
 def main(): 
     testResults = [] 
     envs = ['proda']
-    DVRVersion = "S116" 
+    DVRVersion = "S96" 
     unmatchedProgramCount = 0 
     
     sanityData = SanityData() #Class to hold all of the sanity data 
@@ -1271,7 +1271,7 @@ def main():
             #Check to see if any of the DVR PRoxy Definitions are okay 
             try: 
                 if OSSRecs != None: 
-                    performDVRProxySanity(eachAccount, OSSRecs,sanityData) 
+                    performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,DVRVersion) 
             except:
                 pass
             #try: 
