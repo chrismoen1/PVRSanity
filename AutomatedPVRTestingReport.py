@@ -58,7 +58,7 @@ class SanityData:
         self.devices = 0 
         self.skipTokenError = 0 
         self.DVREmptyData = 0
-        
+        self.dvrStationOutOfSync = 0 
         self.dvr_s96 = 0 
         self.dvr_s108 = 0 
         self.dvr_s116 = 0
@@ -131,6 +131,11 @@ class SanityData:
         self.dvr_s108 += dvr_s108
         self.dvr_s116 += dvr_s116
         self.oss += oss
+        
+    def setDVRStationSync(self,dvrStationOutOfSync): 
+        self.dvrStationOutOfSync += dvrStationOutOfSync 
+    def getdvrStationOutOfSync(self): 
+        return self.dvrStationOutOfSync
         
     def getDVR_S96(self): 
         return self.dvr_s96 
@@ -908,6 +913,7 @@ def processResults(sanityData,featureGroupLen):
     perc_devices = 100 * devices/featureGroupLen 
     perc_enableConfig= 100 *enableConfig/featureGroupLen
     list_originalAir = sanityData.getOriginalAirDate() 
+    outOfSyncDVRData = sanityData.getdvrStationOutOfSync() 
     
     try: 
         results = TimestampAnalyser(list_originalAir)
@@ -965,6 +971,8 @@ def processResults(sanityData,featureGroupLen):
     printTestCase("Test Case 12: Number of occurences of empty DVR Data ", sanityData.getDVREmptyData())
     js.append({"Test Case 12: Number of occurences of empty DVR Data": sanityData.getDVREmptyData()})
     
+    printTestCase("Test Case 13: Number of occurences where DVR station ID did not match OSS station ID",outOfSyncDVRData)
+    js.append({"Test Case 13: Number of occurences where DVR station ID did not match OSS station ID": outOfSyncDVRData})
     return js
     
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
@@ -1025,7 +1033,8 @@ def performDVRProxySanity(eachAccount, OSSRecs,sanityData):
                     #Found that there is a match 
                     flag = True
                     if eachDVR['glfStationID'] == eachOSS['glfStationID']: 
-                        print("Mismatch") 
+                        print("Mismatch between GLF station IDs " + eachDVR['glfStationID'] + " " + eachOSS['glfStationID']) 
+                        sanityData.getdvrStationOutOfSync(1)
                     
             if flag == False and ossState == 'Recorded': 
                 #Then there is something wrong 
@@ -1237,9 +1246,9 @@ def main():
         
         _feature_group = "NAPA_TRIAL"
     
-        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
+        #accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        #accountsInFeatureGroup = ['NAPACLIENT427']
+        accountsInFeatureGroup = ['8452000000000274']
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
