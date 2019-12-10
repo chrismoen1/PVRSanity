@@ -452,7 +452,7 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
             show_b = brec['Show']
             originalAir_b = brec['originalAirDate']
             time_b = brec['Time'] 
-            seriesID_b = brec['seriesID']
+            #seriesID_b = brec['seriesID']
             
             if seriesID_a == seriesID_b and glfProgramID_b == glfProgramID_a and glfProgramID_b != "None" and glfProgramID_a:    
                 if state_b == "Scheduled" and state_a == "Cancelled" and timeDelta(time_b,time_a) > 0:  
@@ -553,8 +553,11 @@ def validationCheckDVRIds(_type,seriesDetailObj):
     if _type == "OSS": 
         dvrID = seriesDetailObj['id']#FOR THE OSS 
     elif _type == "DVRPROXY": 
-        dvrID = seriesDetailObj['glfSeriesId'] #For the DVR Proxy 
-    
+        try: 
+            dvrID = seriesDetailObj['glfSeriesId'] #For the DVR Proxy 
+        except: 
+            dvrID = "" 
+            pass
     if dvrID != None: 
         if dvrID.find('dvr-unmatched') == 0:
             return 1 
@@ -623,7 +626,7 @@ def testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion):
         return 
     
 def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion): 
-                   #'DVRPROXY',eachAccount,env,sanityData,dvrVersion        
+                         
     skipToken = ""
     totalRec = 0                                                                                                                                                                                                                                                                                                                               
     pastScheduled = 0 
@@ -666,13 +669,13 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
             pass
         
         
-        testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion) 
+        testSkipToken(typeCALL, accountName,env,sanityData,DVRVersion) 
     
         try: 
             skipToken = rj['skipToken']
         except: 
             
-            skipToken = ""
+            skipToken = None
         try: 
             recs = rj['recordingDefinitions']
         except: 
@@ -688,8 +691,12 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
         for eachRec in recs: 
 
             recGroup = eachRec['recordings']
-            
-            if eachRec['seriesDetails'] != None: 
+            try: 
+                seriesDetails = eachRec['seriesDetails'] 
+            except: 
+                seriesDetails = None 
+                
+            if seriesDetails != None: 
                 seriesDetailObj = eachRec['seriesDetails']
             try: 
                 seriesNameObj = seriesDetailObj['name']
@@ -841,6 +848,8 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
             conflictCount = 0 
             cancelledCount = 0
             unmatchedProgramCount = 0
+            if skipToken == None or skipToken == "": 
+                return individualRecordings
     #print(len(individualRecordings))    
     return individualRecordings #return the Total Table of all recordings
 
@@ -1002,7 +1011,6 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
                 pass
 def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion): 
     #Perform a sanity based on the recordings of the OSS Definitions
-    
     DVRRECS = mf_getRecordings('DVRPROXY',eachAccount,env,sanityData,dvrVersion)
     checkDVREmpty(DVRRECS,OSSRecs,sanityData,eachAccount)
     #compareRecs(DVRRECS,OSSRecs) 
@@ -1035,7 +1043,7 @@ def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion):
                 if dvr_id == OSS_id and dvrState == ossState:
                     #Found that there is a match 
                     flag = True
-                    if eachDVR['glfStationID'] != eachOSS['glfStationID'] and eachDVR['glfStationID'] != '' and eachOSS['glfStationID'] != '': 
+                    if eachDVR['glfStationID'] != eachOSS['glfStationID'] and eachDVR['glfStationID'] != ''and eachOSS['glfStationID'] != '': 
                         print("Mismatch between GLF station IDs " + eachDVR['glfStationID'] + " " + eachOSS['glfStationID']) 
                         sanityData.setdvrStationOutOfSync(1)
                     
@@ -1063,8 +1071,6 @@ def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion):
             
             if '* ERROR * NULL Recordings Object' in show_DVR == True and recCount_OSS == recCount_DVR and channelNumber_OSS == channelNumber_DVR: 
                 #Then we know that this is a valid run through 
-                
-                
       '''      
             
 def getAccounts_FeatureGroup(_feature_group,env):
@@ -1218,7 +1224,7 @@ def testAPICall(accountName,env,sanityData):
           
         #url_devices = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/devices'
         recordingDefinitionsDVR = session_dvr.get(url_recordingDefinitionsDVR) 
-        time.sleep(10)
+        #time.sleep(10)
         
         #sanityData.setAPIResponse()
         
@@ -1251,16 +1257,16 @@ def main():
     
         #accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        accountsInFeatureGroup = ['ucclient20']
+        accountsInFeatureGroup = ['napaclient20']
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
             
-            try:
-                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
-            except: 
-                OSSRecs = None 
-                pass
+            #try:
+            OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
+            #except: 
+                #OSSRecs = None 
+                #pass
             
             try: 
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
@@ -1272,11 +1278,11 @@ def main():
                 pass 
             
             #Check to see if any of the DVR PRoxy Definitions are okay 
-            try: 
-                if OSSRecs != None: 
-                    performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,DVRVersion) 
-            except:
-                pass
+            #try: 
+            if OSSRecs != None: 
+                performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,DVRVersion) 
+            #except:
+                #pass
             #try: 
                 #if env == 'proda': 
         
@@ -1284,4 +1290,5 @@ def main():
         print(testResults) 
         print("\n")
     return testResults
+
 main() #Return the Test Results 
