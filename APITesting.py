@@ -8,6 +8,8 @@ import time
 import requests
 import json
 from requests_pkcs12 import get
+import matplotlib.pyplot as plt
+
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
     # open token file and check expiry
@@ -85,11 +87,8 @@ def get_token(type_cert,_env,_proxyurl):
     except:
         return None
  
-
-#Getting an API benchmark 
-sVer = ['S96','S108','S116'] 
-while (True): 
-    env = 'prodc'
+def getAPITime(env,backend): 
+    
     top = '100'
     skipToken = ''
     
@@ -97,13 +96,27 @@ while (True):
     session_oss = requests.Session() 
     session_oss.headers = tok_oss 
     
-    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/S108/dvrproxy/v1/tenants/default/accounts/ucclient20/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
-    #url_recordingDefinitionsOSS = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/ucclient20/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
-    try: 
-        response = session_oss.get(url_recordingDefinitionsOSS)
-    except: 
-        pass
-    #testSkipToken(url) 
-    rj = response.json()   
-    print(rj['skipToken']) 
-    #@time.sleep(5)
+    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+backend+'/dvrproxy/v1/tenants/default/accounts/ucclient20/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+    time_elapsed = session_oss.get(url_recordingDefinitionsOSS).elapsed.total_seconds() 
+    
+    return time_elapsed 
+#Getting an API benchmark 
+sVer = ['S96','S108','S116'] 
+prodc_108 =[] 
+prodc_116 =[] 
+i = 0 
+rang_ = [] 
+while (True): 
+    time_ProdC_s108 = getAPITime('prodc','S108') 
+    time_ProdC_S116 = getAPITime('prodc','S116') 
+    prodc_108.append(time_ProdC_s108)
+    prodc_116.append(time_ProdC_S116)
+    rang_.append(i) 
+    print("S108: ", time_ProdC_s108)
+    print("S116 : ", time_ProdC_S116)
+    i = i + 1
+    if i == 100: 
+        break 
+    time.sleep(1) 
+plt.scatter(rang_,prodc_108,c='g') 
+plt.scatter(rang_,prodc_116,c='b') 
