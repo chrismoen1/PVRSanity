@@ -668,7 +668,6 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
         except: 
             pass
         
-        
         testSkipToken(typeCALL, accountName,env,sanityData,DVRVersion) 
     
         try: 
@@ -772,6 +771,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
                         programDetailsGeneric = eachRecGroup['programDetails']['isGeneric']
                     except:
                         programDetailsGeneric = "NULL"
+                        
                     sanityData.setOriginalAirDate(originalAirDate) 
                     #checkValidation(seriesDetailObj,accountName)
                     innerRow['Time'] = startUTC
@@ -847,9 +847,9 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
             pastScheduled = 0 
             conflictCount = 0 
             cancelledCount = 0
-            unmatchedProgramCount = 0
-            if skipToken == None or skipToken == "": 
-                return individualRecordings
+            
+        if skipToken == None or skipToken == "": 
+            return individualRecordings
     #print(len(individualRecordings))    
     return individualRecordings #return the Total Table of all recordings
 
@@ -995,12 +995,18 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
         dvrProgId = eachDVR['programDetailsGLF'] 
         dvr_id = eachDVR['recordingID'] 
         dvr_time = eachDVR['Time']
-        print(eachDVR)
-        #print(dvrProgId) 
-        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName): 
+        dvrShowName = eachDVR['Show'] 
+        
+        if dvrShowName == "NULL" or dvrShowName == None or dvrShowName == "" or dvrShowName ==  "* ERROR * NULL Recordings Object" and re.match('8455',accountName): 
+            print("This show has empty program detail information (DVR) " + accountName) 
             sanityData.setDVREmptyData(1) 
+        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName): 
+            print("This show has an empty program ID on account (DVR) ", accountName) 
+            sanityData.setDVREmptyData(1) 
+    
             for eachOSS in OSSRecs: 
                 if dvr_id == eachOSS['recordingID']: 
+                    
                     showName = eachOSS['Show'] 
                     startTime = eachOSS['Time']
                     channelNumber = eachOSS['Channel Number'] 
@@ -1040,7 +1046,7 @@ def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion):
                 dvr_id = eachDVR['recordingID'] 
                 #print(dvrProgId) 
                 
-                if dvr_id == OSS_id and dvrState == ossState:
+                if dvr_id == OSS_id:
                     #Found that there is a match 
                     flag = True
                     if eachDVR['glfStationID'] != eachOSS['glfStationID'] and eachDVR['glfStationID'] != ''and eachOSS['glfStationID'] != '': 
@@ -1239,8 +1245,9 @@ def testAPICall(accountName,env,sanityData):
         
 def main(): 
     testResults = [] 
-    envs = ['prodc']
-    DVRVersion = "S116" 
+    envs = ['proda','prodb','prodc']
+    
+    DVRVersion = "S96" 
     unmatchedProgramCount = 0 
     
     sanityData = SanityData() #Class to hold all of the sanity data 
@@ -1255,18 +1262,18 @@ def main():
         
         _feature_group = "NAPA_TRIAL"
     
-        #accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
+        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        accountsInFeatureGroup = ['napaclient20']
+        #accountsInFeatureGroup = ['ucclient20']
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
             
-            #try:
-            OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
-            #except: 
-                #OSSRecs = None 
-                #pass
+            try:
+                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
+            except: 
+                OSSRecs = None 
+                pass
             
             try: 
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
@@ -1285,8 +1292,12 @@ def main():
                 #pass
             #try: 
                 #if env == 'proda': 
+        innerRow = {} 
         
-        testResults.append(processResults(sanityData,featureGroupLen))
+        results_p = processResults(sanityData,featureGroupLen)
+        innerRow['Environment'] = results_p
+        testResults.append(results_p)
+        
         print(testResults) 
         print("\n")
     return testResults

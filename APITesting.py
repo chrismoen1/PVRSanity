@@ -8,6 +8,10 @@ import time
 import requests
 import json
 from requests_pkcs12 import get
+import matplotlib.pyplot as plt
+import numpy as np 
+from matplotlib.pyplot import figure
+
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
     # open token file and check expiry
@@ -85,11 +89,7 @@ def get_token(type_cert,_env,_proxyurl):
     except:
         return None
  
-
-#Getting an API benchmark 
-sVer = ['S96','S108','S116'] 
-while (True): 
-    env = 'prodc'
+def getProdCTime_DVR(env,backend): 
     top = '100'
     skipToken = ''
     
@@ -97,13 +97,52 @@ while (True):
     session_oss = requests.Session() 
     session_oss.headers = tok_oss 
     
-    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/S108/dvrproxy/v1/tenants/default/accounts/ucclient20/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+backend+'/dvrproxy/v1/tenants/default/accounts/ucclient20/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+    
     #url_recordingDefinitionsOSS = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/ucclient20/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
     try: 
         response = session_oss.get(url_recordingDefinitionsOSS)
     except: 
         pass
     #testSkipToken(url) 
-    rj = response.json()   
-    print(rj['skipToken']) 
-    #@time.sleep(5)
+    time_seconds = response.elapsed.total_seconds() 
+    
+    return time_seconds
+
+#Getting an API benchmark 
+prodC_116 = [] 
+prodC_108 = [] 
+proda = [] 
+prodb = [] 
+rang_ = [] 
+i = 0
+while (True): 
+    time_prodC_116 = getProdCTime_DVR('prodc','S116')
+    time_prodC_108 = getProdCTime_DVR('prodc','S108')
+    time_prodA = getProdCTime_DVR('proda','S96')
+    time_prodB = getProdCTime_DVR('prodb','S108')
+    proda.append(time_prodA) 
+    print("Prod A ", time_prodA) 
+    
+    prodC_116.append(time_prodC_116)
+    print("Prod C 108", time_prodC_108) 
+    print("Prod C 116", time_prodC_116) 
+    prodC_108.append(time_prodC_108)
+    prodb.append(time_prodB) 
+    print("Prod B 108", time_prodB) 
+    i = i + 1
+    rang_.append(i)
+    if i == 100: 
+        break 
+    #time.sleep(0.1)
+fig = plt.figure(figsize=(20,10)) 
+plt.scatter(rang_,proda,c='g',label='Prod A Response Times') 
+plt.scatter(rang_,prodC_116,c='b',label='Prod C R116 Response Times') 
+plt.scatter(rang_,prodC_108,c='y',label='Prod C R108 Response Times') 
+plt.scatter(rang_,prodb,c='r',label='Prod B R108 Response Times') 
+plt.legend() 
+#plt.show() 
+
+fig.savefig('as;ldkfj.png',dpi=fig.dpi)
+
+print(prodc)
