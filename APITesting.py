@@ -96,7 +96,7 @@ def getAPITime(env,backend):
     session_oss = requests.Session() 
     session_oss.headers = tok_oss 
     
-    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+backend+'/dvrproxy/v1/tenants/default/accounts/ucclient20/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
+    url_recordingDefinitionsOSS= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+backend+'/dvrproxy/v1/tenants/default/accounts/napaclient40/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
     time_elapsed = session_oss.get(url_recordingDefinitionsOSS).elapsed.total_seconds() 
     
     return time_elapsed 

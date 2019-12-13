@@ -54,6 +54,7 @@ class SanityData:
         self.outOfSync = 0 
         self.fake_generic = 0 
         self.originalAirDate = [] 
+        self.errorCodes = [] 
         self.enableConfiguration = 0
         self.devices = 0 
         self.skipTokenError = 0 
@@ -93,6 +94,10 @@ class SanityData:
         self.skipTokenError += skipToken
     def setDevices(self,devices): 
         self.devices += devices
+    def errorResponseCode(self,code): 
+        self.errorCodes.append(code) 
+    def getErrorResponseCode(self,code): 
+        return self.errorCodes
     def setEnableConfiguration(self,enableConfiguration): 
         if enableConfiguration != None: 
             self.enableConfiguration += enableConfiguration
@@ -374,7 +379,7 @@ def output_file(account,individualRecs, recSummary,showName,recCount, schedCount
     file1.write(total)
     file1.close()
 
-def timeDelta(time1,time2): 
+def timeDelta(time1,time2): #time stamp 
    
     time1_st = datetime.datetime.strptime(time1,"%Y-%m-%dT%H:%M:%SZ")
     time2_st = datetime.datetime.strptime(time2,"%Y-%m-%dT%H:%M:%SZ")
@@ -622,8 +627,24 @@ def testSkipToken(typeCALL,accountName,env,sanityData,DVRVersion):
     except: 
         #Otherwise, this is an error and we have an error with this account 
         sanityData.setSkipTokenError(1)
-        print("Invalid Skip Token "  + rj + " " + accountName)  
+        print("Invalid Skip Token "  + accountName)  
         return 
+def checkResponseType(response): 
+    #responseCode = respone.
+    code = response.status_code 
+    if str(code) == "503":
+        print("Error code present") 
+    
+    sanityData.errorResponseCode(code) 
+def getUpgradeGroup(eachAccount,env): 
+    accountSettings = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + eachAccount
+    tok = get_token('OSS',env, list())
+    
+    session = requests.Session()
+    session.headers = tok
+    
+    response = session.get(accountSettings) 
+    rj = response.json() 
     
 def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion): 
                          
@@ -655,6 +676,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
           
         try: 
             response = session.get(url)
+            #checkResponseType(response) 
         except: 
             return 
         #testSkipToken(url) 
@@ -668,6 +690,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
         except: 
             pass
         
+        upgradeGroup = getUpgradeGroup(accountName,env) 
         
         testSkipToken(typeCALL, accountName,env,sanityData,DVRVersion) 
     
@@ -1236,14 +1259,29 @@ def testAPICall(accountName,env,sanityData):
     url_recordingDefinitionsOSS = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
     recordingDefinitionsOSS = session_oss.get(url_recordingDefinitionsOSS)
     print("OSS Recording Definitions", recordingDefinitionsOSS) 
-        
+def checkOSSRecsPastDate(timeStamp,ossRecordings): 
+    #Goal of this function is to check whether there are any recordings that have been scheduled greater than a certain timeframe 
+    count = 0
+    try: 
+        recordingLength = len(ossRecordings)
+    except: 
+        return 
+        pass 
+    
+    for eachOSS in ossRecordings: 
+        ossTimeStamp = eachOSS['Time']
+        if timeDelta(timeStamp,ossTimeStamp) > 0: 
+            count += 1
+    if count > 0: 
+        print("This account has " + str(recordingLength) + " but has recordings that are not past the 18th")
+        return 
 def main(): 
     testResults = [] 
     envs = ['prodc']
     DVRVersion = "S116" 
     unmatchedProgramCount = 0 
     
-    sanityData = SanityData() #Class to hold all of the sanity data 
+    sanityData = SanityData() #Class to hold    all of the sanity data 
     
     for env in envs: 
         #try: 
@@ -1255,19 +1293,23 @@ def main():
         
         _feature_group = "NAPA_TRIAL"
     
-        #accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
+        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        accountsInFeatureGroup = ['napaclient20']
+        #accountsInFeatureGroup = ['napaclient40','leslietest'] 
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
             
             #try:
             OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
+            try: 
+                dateCheck = checkOSSRecsPastDate('2019-12-18T00:00:00Z',OSSRecs) 
+            except: 
+                pass 
             #except: 
                 #OSSRecs = None 
                 #pass
-            
+            #checkRecordingsPastCertainDate(OSSRecs,)
             try: 
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
             except: 
