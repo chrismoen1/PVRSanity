@@ -1294,7 +1294,7 @@ def checkOSSRecsPastDate(timeStamp,ossRecordings):
         return 
 def main(): 
     testResults = [] 
-    envs = ['prodc']
+    envs = ['proda','prodb','prodc']
     
     sanityData = SanityData() #Class to hold    all of the sanity data 
     
@@ -1326,11 +1326,11 @@ def main():
         for eachAccount in accountsInFeatureGroup:
             
 
-            #try:
-            OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
-            #except: 
-                #OSSRecs = None 
-                #pass
+            try:
+                OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
+            except: 
+                OSSRecs = None 
+                pass
             
             try: 
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 

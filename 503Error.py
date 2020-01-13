@@ -286,7 +286,7 @@ def main():
     env = 'prodc'
     sanityData = SanityData() #Class to hold    all of the sanity data 
         
-    print("Accounts with 503 errors", env)
+    print("Accounts with 503 errors: ", env)
     
     _feature_group = "NAPA_TRIAL"
 
