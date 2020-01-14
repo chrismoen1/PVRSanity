@@ -459,7 +459,7 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
             time_b = brec['Time'] 
             #seriesID_b = brec['seriesID']
             
-            if seriesID_a == seriesID_b and glfProgramID_b == glfProgramID_a and glfProgramID_b != "None" and glfProgramID_a:    
+            if seriesID_a == seriesID_b and glfProgramID_b == glfProgramID_a and glfProgramID_b != "None" and glfProgramID_a != "None":    
                 if state_b == "Scheduled" and state_a == "Cancelled" and timeDelta(time_b,time_a) > 0:  
                         #And the time_a was greater than time_b
                         print("Show was scheduled and then cancelled")
@@ -988,6 +988,8 @@ def processResults(sanityData,featureGroupLen):
     printTestCase("Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]", outOfSync)
     js.append({"Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]": progDetails})
     
+    
+    
     printTestCase("Test Case 7: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
     if perc_enableConfig > 2: 
         #Then 
@@ -1023,7 +1025,7 @@ def processResults(sanityData,featureGroupLen):
     #print("Test Case 5: Total Number of Unmatched Program IDS", unmatchedProgramCount)
     #def checkRecordedStates(OSSRecs, DVRRECS): 
 
-def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName): 
+def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
     for eachDVR in DVRRECS: 
         
         dvrProgId = eachDVR['programDetailsGLF'] 
@@ -1208,6 +1210,7 @@ def checkAccountSettings(accountName,env,sanityData):
         #THen we have a case that there is an account mismatch 
         print(accountName + " Is not configured correctly ") 
         sanityData.setAccountConfigurationVal(1)
+        
 def checkDeviceSettings(accountName,env,sanityData): 
     #Now we want to check the account's settings to make sure that there is no potential discrepancy with the ingress bandwidths 
     
@@ -1244,6 +1247,7 @@ def checkDeviceSettings(accountName,env,sanityData):
         
         if skip == None: 
             break 
+        
 def testAPICall(accountName,env,sanityData): 
     #Run API call testing 
     dvrVersion = ['S96','S108','S116'] 
@@ -1290,11 +1294,13 @@ def checkOSSRecsPastDate(timeStamp,ossRecordings):
         if timeDelta(timeStamp,ossTimeStamp) > 0: 
             count += 1
     if count > 0: 
+        
         print("This account has " + str(recordingLength) + " but has recordings that are not past the 18th")
+        
         return 
 def main(): 
     testResults = [] 
-    envs = ['proda','prodb','prodc']
+    envs = ['prodc']
     
     sanityData = SanityData() #Class to hold    all of the sanity data 
     
@@ -1318,7 +1324,7 @@ def main():
     
         accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
         
-        #accountsInFeatureGroup = ['bellggvoice369'] 
+        #accountsInFeatureGroup = ['napaclient40'] 
         #accountsInFeatureGroup = ['ucclient20']
 
         featureGroupLen = len(accountsInFeatureGroup)

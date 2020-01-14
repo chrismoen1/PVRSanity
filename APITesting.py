@@ -134,7 +134,7 @@ while (True):
     print("Prod B 108", time_prodB) 
     i = i + 1
     rang_.append(i)
-    if i == 10: 
+    if i == 100: 
         break
     
     #time.sleep(0.1)
