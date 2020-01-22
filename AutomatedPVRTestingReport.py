@@ -44,111 +44,111 @@ counter = 0
 path = "D:\\scripts\\output\\hourly_C"
 
 class SanityData:
-    def __init__(self): 
-        self.valMissingIDs_program = 0 
+    def __init__(self):
+        self.valMissingIDs_program = 0
         self.valIndRecs_program = 0
         self.valImages_program = 0
         self.valDVRIds_program = 0
-        self.accountConfigurationVal_program = 0 
-        self.progDetails = 0 
-        self.outOfSync = 0 
-        self.fake_generic = 0 
-        self.originalAirDate = [] 
-        self.errorCodes = [] 
+        self.accountConfigurationVal_program = 0
+        self.progDetails = 0
+        self.outOfSync = 0
+        self.fake_generic = 0
+        self.originalAirDate = []
+        self.errorCodes = []
         self.enableConfiguration = 0
-        self.devices = 0 
-        self.skipTokenError = 0 
+        self.devices = 0
+        self.skipTokenError = 0
         self.DVREmptyData = 0
-        self.dvrStationOutOfSync = 0 
-        self.dvr_s96 = 0 
-        self.dvr_s108 = 0 
+        self.dvrStationOutOfSync = 0
+        self.dvr_s96 = 0
+        self.dvr_s108 = 0
         self.dvr_s116 = 0
         self.oss = 0
-    def getOriginalAirDate(self): 
+    def getOriginalAirDate(self):
         return self.originalAirDate
-    def getEnableConfiguration(self): 
-        return self.enableConfiguration 
-    def getMissingIDS(self): 
-        return self.valMissingIDs_program 
-    def getValIndRecs(self): 
+    def getEnableConfiguration(self):
+        return self.enableConfiguration
+    def getMissingIDS(self):
+        return self.valMissingIDs_program
+    def getValIndRecs(self):
         return self.valIndRecs_program
-    def valImages(self): 
-        return self.valImages_program 
-    def valDVRIds(self): 
-        return self.valDVRIds_program 
-    def getAccountConfigurationVal(self): 
+    def valImages(self):
+        return self.valImages_program
+    def valDVRIds(self):
+        return self.valDVRIds_program
+    def getAccountConfigurationVal(self):
         return self.accountConfigurationVal_program
-    def getProgDetails(self): 
+    def getProgDetails(self):
         return self.progDetails
-    def getDVROutOfSync(self): 
+    def getDVROutOfSync(self):
         return self.outOfSync
-    def getFake_generic(self): 
+    def getFake_generic(self):
         return self.fake_generic
-    def getDevices(self): 
+    def getDevices(self):
         return self.devices
-    def getDVREmptyData(self): 
+    def getDVREmptyData(self):
         return self.DVREmptyData
-    def getSkipTokenError(self): 
+    def getSkipTokenError(self):
         return self.skipTokenError
-    def setSkipTokenError(self,skipToken): 
+    def setSkipTokenError(self,skipToken):
         self.skipTokenError += skipToken
-    def setDevices(self,devices): 
+    def setDevices(self,devices):
         self.devices += devices
-    def errorResponseCode(self,code): 
-        self.errorCodes.append(code) 
-    def getErrorResponseCode(self,code): 
+    def errorResponseCode(self,code):
+        self.errorCodes.append(code)
+    def getErrorResponseCode(self,code):
         return self.errorCodes
-    def setEnableConfiguration(self,enableConfiguration): 
-        if enableConfiguration != None: 
+    def setEnableConfiguration(self,enableConfiguration):
+        if enableConfiguration != None:
             self.enableConfiguration += enableConfiguration
-    def setOriginalAirDate(self,originalAirDate): 
-        if originalAirDate != None: 
-            self.originalAirDate.append(originalAirDate) 
-    def setValMissingIDS(self, valMissingIDs): 
-        if valMissingIDs != None: 
+    def setOriginalAirDate(self,originalAirDate):
+        if originalAirDate != None:
+            self.originalAirDate.append(originalAirDate)
+    def setValMissingIDS(self, valMissingIDs):
+        if valMissingIDs != None:
             self.valMissingIDs_program += valMissingIDs
     def setValIndRecs(self,valIndRecs):
-        if valIndRecs != None: 
+        if valIndRecs != None:
             self.valIndRecs_program += valIndRecs
     def setValImages(self,valImages):
-        if valImages != None: 
-            self.valImages_program += valImages 
-    def setValDVRIds(self,valDVRIds): 
-        if valDVRIds != None: 
+        if valImages != None:
+            self.valImages_program += valImages
+    def setValDVRIds(self,valDVRIds):
+        if valDVRIds != None:
             self.valDVRIds_program += valDVRIds
-    def setAccountConfigurationVal(self, accountConfigurationVal): 
-        if accountConfigurationVal != None: 
+    def setAccountConfigurationVal(self, accountConfigurationVal):
+        if accountConfigurationVal != None:
             self.accountConfigurationVal_program += accountConfigurationVal
-    def setProgDetails(self,progDetails): 
-        if progDetails != None: 
+    def setProgDetails(self,progDetails):
+        if progDetails != None:
             self.progDetails += progDetails
-    def setDVROutOfSync(self,outOfSync): 
-        if outOfSync != None: 
+    def setDVROutOfSync(self,outOfSync):
+        if outOfSync != None:
             self.outOfSync += outOfSync
-    def setfake_generic(self,fake_generic): 
-        if fake_generic != None: 
+    def setfake_generic(self,fake_generic):
+        if fake_generic != None:
             self.fake_generic += fake_generic
-    def setDVREmptyData(self,dvrData): 
-        if dvrData != None: 
-            self.DVREmptyData += dvrData 
-    def setAPIResponse(self,dvr_s96,dvr_s108,dvr_s116,oss): 
+    def setDVREmptyData(self,dvrData):
+        if dvrData != None:
+            self.DVREmptyData += dvrData
+    def setAPIResponse(self,dvr_s96,dvr_s108,dvr_s116,oss):
         self.dvr_s96 += dvr_s96
         self.dvr_s108 += dvr_s108
         self.dvr_s116 += dvr_s116
         self.oss += oss
-        
-    def setdvrStationOutOfSync(self,dvrStationOutOfSync): 
-        self.dvrStationOutOfSync += dvrStationOutOfSync 
-    def getdvrStationOutOfSync(self): 
+
+    def setdvrStationOutOfSync(self,dvrStationOutOfSync):
+        self.dvrStationOutOfSync += dvrStationOutOfSync
+    def getdvrStationOutOfSync(self):
         return self.dvrStationOutOfSync
-        
-    def getDVR_S96(self): 
-        return self.dvr_s96 
-    def getDVR_S108(self): 
-        return self.dvr_s108 
-    def getDVR_s116(self): 
-        return self.dvr_s116 
-    def getOSS(self): 
+
+    def getDVR_S96(self):
+        return self.dvr_s96
+    def getDVR_S108(self):
+        return self.dvr_s108
+    def getDVR_s116(self):
+        return self.dvr_s116
+    def getOSS(self):
         return self.oss
 def get_token(type_cert,_env,_proxyurl):
     #This is courtesy of James Owen c. April 2019 
@@ -169,6 +169,8 @@ def get_token(type_cert,_env,_proxyurl):
         cert_pass = 'Medi@F1rst'
         token_uri = 'https://appgw-operatorstsssl.'+instance+'.tv3cloud.com/certactive'
         token_filename = './'+instance+'_token.json'
+
+
     elif _env == 'prodc':
         instance = 'prodc.bce'
         cert = basePath + 'credentials/ucpusher-ssl.pfx'
@@ -186,7 +188,7 @@ def get_token(type_cert,_env,_proxyurl):
         cert_pass = 'Medi@F1rst'
         token_uri = 'https://appgw-operatorstsssl.'+instance+'.tv3cloud.com/certactive'
         token_filename = './'+instance+'_token.json'
-
+        
     token_valid = 0
     try:
         with open(token_filename, 'r') as token_file_in:
@@ -226,7 +228,7 @@ def get_token(type_cert,_env,_proxyurl):
         return auth_header
     except:
         return None
- 
+
 def splitNumbers(eachList): 
     #Then we know that there is a match for this particular file type 
     pathList = eachList.split('_') 
@@ -652,8 +654,83 @@ def getUpgradeGroup(eachAccount,env):
     
     response = session.get(accountSettings) 
     rj = response.json() 
-    
-def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion): 
+def checkCatalogue(recs, tok, _env,accountName):
+    session = requests.Session()
+    session.headers = tok
+    for eachRec in recs: 
+        try: 
+            uid = str(eachRec['externalID'])
+        except: 
+            return
+        env = str(_env)
+        # print('==> Getting title: ' + str(uid) +'\n')
+        url = "https://appgw-client-a." + env + ".bce.tv3cloud.com/S96/discovery/v3/programs/" + uid
+        # print("URL: " + url)
+        # try:
+        # augmented_data = mf_get_op_data(uid)
+        # popularity = augmented_data['popularity']
+        # mf_imagestatus = augmented_data['mf_imagestatus']
+        # try:
+        # mf_matchstatus = augmented_data['mf_matchstatus']
+        # except:
+        # mf_matchstatus = "Err"
+        # except:
+        # popularity = -1
+        # try:
+        response = session.get(url)  # , headers=token
+        if str(response.status_code) != '404': 
+            try:
+                rj = response.json()
+                # print(rj)
+                try:
+                    description = rj['Description']
+                except:
+                    description = ""
+                try:
+                    seriesid = rj['SeriesId']
+                except:
+                    seriesid = "Error"
+                try:
+                    title = rj['Name']
+                except:
+                    title = "Error"
+                try:
+                    inferred_oad = rj['OriginalAirDate']
+                except:
+                    inferred_oad = "Error"
+                try:
+                    inferred_language = rj['Locale']
+                except:
+                    inferred_language = "Error"
+                try:
+                    inferred_rating = rj['Ratings'][0]['Value']
+                except:
+                    inferred_rating = "Error"
+                try:
+                    episode_title = rj['EpisodeName']
+                except:
+                    episode_title = ""
+                try:
+                    images = rj['Images']
+                except:
+                    images = []
+                try:
+                    supported_images = rj['SupportedImages']
+                except:
+                    supported_images = []
+                try:
+                    showName = rj['Name']
+                except:
+                    showName = "test"
+
+                currShow = eachRec['Show']
+                if showName != currShow and eachRec['Series State'] != "Recorded":
+                    print("The OSS Show Name: "  + currShow + " and the Catalogue Show Name: " + showName)
+                    print("State: ", eachRec['Series State'] + " on " + accountName)
+            except:
+                return
+
+def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
                          
     skipToken = ""
     totalRec = 0                                                                                                                                                                                                                                                                                                                               
@@ -677,19 +754,19 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
         if typeCALL == 'OSS': 
             url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
             
-        elif typeCALL == 'DVRPROXY': 
+        elif typeCALL == 'DVRPROXY':
             #url = 'https://appgw-client.'+env+'.bce.tv3cloud.com/S96/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
             url= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+DVRVersion+'/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
           
-        try: 
+        try:
             response = session.get(url)
-            
             if str(response.status_code) == "503": 
-                print("503 Error on this account ", accountName)   
+                print("503 Error on this account ", accountName)
             #checkResponseType(response) 
         except: 
-            return 
-        #testSkipToken(url) 
+            return
+
+        #testSkipToken(url)
         rj = response.json()
         if rj == None: 
             return #Then there is nothing in this json (i.e empty )
@@ -805,6 +882,10 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
                         programDetailsGeneric = eachRecGroup['programDetails']['isGeneric']
                     except:
                         programDetailsGeneric = "NULL"
+                    try: 
+                        externalId = eachRecGroup['programDetails']['id']
+                    except: 
+                        externalId = "NULL" 
                         
                     sanityData.setOriginalAirDate(originalAirDate) 
                     #checkValidation(seriesDetailObj,accountName)
@@ -812,6 +893,7 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
                     innerRow['Show'] = showName
                     innerRow['Season Number'] = seasonNumber 
                     innerRow['Ep'] = epNumber
+                    innerRow['externalID'] = externalId
                     innerRow['Channel Number'] = channelNumber
                     innerRow['Series State'] = seriesObjState 
                     innerRow['seriesObjType'] = seriesObjType
@@ -883,7 +965,8 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
             cancelledCount = 0
             
         if skipToken == None or skipToken == "": 
-            return individualRecordings
+            break
+    #checkCatalogue(individualRecordings,tok,env,accountName)
     #print(len(individualRecordings))    
     return individualRecordings #return the Total Table of all recordings
 
@@ -989,7 +1072,6 @@ def processResults(sanityData,featureGroupLen):
     js.append({"Test Case 6: Number of Occurences of out-of-sync accounts between DVR Proxy and OSS definitions [MFR-8249]": progDetails})
     
     
-    
     printTestCase("Test Case 7: Number of Occurences of fake but labelled as generic for EP0 and SH0 IDS", fake_gen)
     if perc_enableConfig > 2: 
         #Then 
@@ -1026,30 +1108,30 @@ def processResults(sanityData,featureGroupLen):
     #def checkRecordedStates(OSSRecs, DVRRECS): 
 
 def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
-    for eachDVR in DVRRECS: 
-        
-        dvrProgId = eachDVR['programDetailsGLF'] 
-        dvr_id = eachDVR['recordingID'] 
+    for eachDVR in DVRRECS:
+
+        dvrProgId = eachDVR['programDetailsGLF']
+        dvr_id = eachDVR['recordingID']
         dvr_time = eachDVR['Time']
-        dvrShowName = eachDVR['Show'] 
-        
-        if dvrShowName == "NULL" or dvrShowName == None or dvrShowName == "" or dvrShowName ==  "* ERROR * NULL Recordings Object" and re.match('8455',accountName): 
-            print("This show has empty program detail information (DVR) " + accountName) 
-            sanityData.setDVREmptyData(1) 
-        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName): 
-            print("This show has an empty program ID on account (DVR) ", accountName) 
-            sanityData.setDVREmptyData(1) 
-    
-            for eachOSS in OSSRecs: 
-                if dvr_id == eachOSS['recordingID']: 
-                    
-                    showName = eachOSS['Show'] 
+        dvrShowName = eachDVR['Show']
+
+        if dvrShowName == "NULL" or dvrShowName == None or dvrShowName == "" or dvrShowName ==  "* ERROR * NULL Recordings Object" and re.match('8455',accountName):
+            print("This show has empty program detail information (DVR) " + accountName)
+            sanityData.setDVREmptyData(1)
+        if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName):
+            print("This show has an empty program ID on account (DVR) ", accountName)
+            sanityData.setDVREmptyData(1)
+
+            for eachOSS in OSSRecs:
+                if dvr_id == eachOSS['recordingID']:
+
+                    showName = eachOSS['Show']
                     startTime = eachOSS['Time']
-                    channelNumber = eachOSS['Channel Number'] 
+                    channelNumber = eachOSS['Channel Number']
                     break
-            try: 
+            try:
                 print("This Show is Empty "+ showName + " " + startTime + " on channel " + str(channelNumber) + " on " + accountName)
-            except: 
+            except:
                 pass
 def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion): 
     #Perform a sanity based on the recordings of the OSS Definitions
@@ -1126,6 +1208,7 @@ def getAccounts_FeatureGroup(_feature_group,env):
 
     while True:
         url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/feature-groups/' + _feature_group +'/accounts?$top=10'
+        
         if len(skip) > 0: 
             url += '&$skipToken=' + skip 
 
@@ -1140,171 +1223,173 @@ def getAccounts_FeatureGroup(_feature_group,env):
             allAccounts.extend(accounts)
         except: 
             pass 
-        
-        skip = rj['skipToken'] 
-
+        try: 
+            skip = rj['skipToken'] 
+        except: 
+            break 
         if skip == None: 
             break 
 
-    return allAccounts 
-def checkAccountSettings(accountName,env,sanityData): 
-    #Now we want to check the account's settings to make sure that there is no potential discrepancy with the ingress bandwidths 
+    return allAccounts
+def checkAccountSettings(accountName,env,sanityData):
+    #Now we want to check the account's settings to make sure that there is no potential discrepancy with the ingress bandwidths
     url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts' + accountName
-    
+
     skip = ""
     count_band = 0
     tok = get_token('OSS',env, list())
-    
+
     session = requests.Session()
     session.headers = tok
     while True:
         url = url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName
-        if len(skip) > 0: 
-            url += '&$skipToken=' + skip 
+        if len(skip) > 0:
+            url += '&$skipToken=' + skip
 
-        try: 
-            resp = session.get(url) 
-            rj = resp.json() 
-        except: 
+        try:
+            resp = session.get(url)
+            rj = resp.json()
+        except:
             pass
-        if accountName.find('84') == -1: 
+        if accountName.find('84') == -1:
            return
-            
-        wanProfile = rj['wanProfile']['maxBitRate'] 
-        enable = rj['enabled'] 
-        ingressBandwidth = rj['streamProfile']['maxIngressBandwidth'] 
-        egressBandwidth = rj['streamProfile']['maxEgressBandwidth'] 
+
+        wanProfile = rj['wanProfile']['maxBitRate']
+        enable = rj['enabled']
+        ingressBandwidth = rj['streamProfile']['maxIngressBandwidth']
+        egressBandwidth = rj['streamProfile']['maxEgressBandwidth']
         ingressStreamCount = rj['streamProfile']['maxIngressStreamCount']
-        egressStreamCount = rj['streamProfile']['maxEgressStreamCount'] 
-        
-        wanProfile = rj['wanProfile']['maxBitRate'] 
-        
-        if enable == True: 
-            #Then we can do some checks 
-            if ingressBandwidth == None and egressBandwidth != None: 
-                #print("Account profile has not been set properly for Egress Bandwidth and Ingress Bandwidth for " + accountName) 
+        egressStreamCount = rj['streamProfile']['maxEgressStreamCount']
+
+        wanProfile = rj['wanProfile']['maxBitRate']
+
+        if enable == True:
+            #Then we can do some checks
+            if ingressBandwidth == None and egressBandwidth != None:
+                #print("Account profile has not been set properly for Egress Bandwidth and Ingress Bandwidth for " + accountName)
                 count_band += 1
-            if ingressBandwidth != None and egressBandwidth == None:       
-                #print("Account profile has not been set properly for Egress Bandwidth and Ingress Bandwidth for " + accountName) 
-                count_band += 1 
-            if egressStreamCount == None and ingressStreamCount != None: 
+            if ingressBandwidth != None and egressBandwidth == None:
+                #print("Account profile has not been set properly for Egress Bandwidth and Ingress Bandwidth for " + accountName)
+                count_band += 1
+            if egressStreamCount == None and ingressStreamCount != None:
                 #print("Account profile has not been set properly for Egress Stream Count and Ingress Stream Count for " + accountName)
-                count_band += 1 
-            #if ingressBandwidth != None and wanProfile != None: 
-                #if ingressBandwidth > int(wanProfile):
-                    #print("Account profile has not been set properly for Ingress Bandwdith and Wan Profile for " + accountName) 
-                    #count_band += 1  
-            if wanProfile == None: 
                 count_band += 1
-        elif enable == False: 
-            sanityData.setEnableConfiguration(1) 
-        try: 
-            skip = rj['skipToken'] 
-        except: 
-            skip = None 
-        
-        if skip == None: 
-            break 
-            
-    if count_band != 0: 
-        #THen we have a case that there is an account mismatch 
-        print(accountName + " Is not configured correctly ") 
+            #if ingressBandwidth != None and wanProfile != None:
+                #if ingressBandwidth > int(wanProfile):
+                    #print("Account profile has not been set properly for Ingress Bandwdith and Wan Profile for " + accountName)
+                    #count_band += 1
+            if wanProfile == None:
+                count_band += 1
+        elif enable == False:
+            sanityData.setEnableConfiguration(1)
+        try:
+            skip = rj['skipToken']
+        except:
+            skip = None
+
+        if skip == None:
+            break
+
+    if count_band != 0:
+        #THen we have a case that there is an account mismatch
+        print(accountName + " Is not configured correctly ")
         sanityData.setAccountConfigurationVal(1)
-        
-def checkDeviceSettings(accountName,env,sanityData): 
-    #Now we want to check the account's settings to make sure that there is no potential discrepancy with the ingress bandwidths 
-    
+
+def checkDeviceSettings(accountName,env,sanityData):
+    #Now we want to check the account's settings to make sure that there is no potential discrepancy with the ingress bandwidths
+
     skip = ""
     count_band = 0
     tok = get_token('OSS',env, list())
-    
+
     session = requests.Session()
     session.headers = tok
     while True:
         url = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/devices'
-        if len(skip) > 0: 
-            url += '&$skipToken=' + skip 
+        if len(skip) > 0:
+            url += '&$skipToken=' + skip
 
-        try: 
-            resp = session.get(url) 
-            rj = resp.json() 
-        except: 
+        try:
+            resp = session.get(url)
+            rj = resp.json()
+        except:
             pass
-        
-        if re.match('84',accountName) == None: 
+
+        if re.match('84',accountName) == None:
             return
-        try: 
-            deviceIDs = len(rj['deviceIds']) 
-        except: 
-            deviceIDs = 0 
-        if deviceIDs == 0: 
-            sanityData.setDevices(1) 
-    
-        try: 
-            skip = rj['skipToken'] 
-        except: 
-            skip = None 
-        
-        if skip == None: 
-            break 
-        
-def testAPICall(accountName,env,sanityData): 
-    #Run API call testing 
-    dvrVersion = ['S96','S108','S116'] 
+        try:
+            deviceIDs = len(rj['deviceIds'])
+        except:
+            deviceIDs = 0
+        if deviceIDs == 0:
+            sanityData.setDevices(1)
+
+        try:
+            skip = rj['skipToken']
+        except:
+            skip = None
+
+        if skip == None:
+            break
+
+def testAPICall(accountName,env,sanityData):
+    #Run API call testing
+    dvrVersion = ['S96','S108','S116']
     skipToken = ""
     top = '100'
-    
-    #Token for the DVR Proxy API 
+
+    #Token for the DVR Proxy API
     tok_dvr = get_token('DVRPROXY',env, list())
     session_dvr = requests.Session()
     session_dvr.headers = tok_dvr
-    
+
     tok_oss = get_token("OSS", env,list())
-    session_oss = requests.Session() 
-    session_oss.headers = tok_oss 
-    
-    for eachdvr in dvrVersion: 
+    session_oss = requests.Session()
+    session_oss.headers = tok_oss
+
+    for eachdvr in dvrVersion:
         url_recordingDefinitionsDVR= 'https://appgw-client.'+env+'.bce.tv3cloud.com/'+eachdvr+'/dvrproxy/v1/tenants/default/accounts/' + accountName + '/recording-definitions/?orderby=startdate&$top='+top+'&$skipToken='+skipToken
-          
+
         #url_devices = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/devices'
-        recordingDefinitionsDVR = session_dvr.get(url_recordingDefinitionsDVR) 
+        recordingDefinitionsDVR = session_dvr.get(url_recordingDefinitionsDVR)
         #time.sleep(10)
-        
+
         #sanityData.setAPIResponse()
-        
+
         #url_recordingDefinitionsOSS = session.get(url_recordingDefinitionsOSS)
-        #resp_url_devices = session.get(url_devices) 
-        
+        #resp_url_devices = session.get(url_devices)
+
         print("DVR Recording Definitions ", recordingDefinitionsDVR)
-    
+
     url_recordingDefinitionsOSS = 'https://appgw-boss.'+env+'.bce.tv3cloud.com/oss/v1/accounts/' + accountName + '/recording-definitions/?$top='+top+'&$skipToken=' + skipToken
     recordingDefinitionsOSS = session_oss.get(url_recordingDefinitionsOSS)
-    print("OSS Recording Definitions", recordingDefinitionsOSS) 
-def checkOSSRecsPastDate(timeStamp,ossRecordings): 
-    #Goal of this function is to check whether there are any recordings that have been scheduled greater than a certain timeframe 
+    print("OSS Recording Definitions", recordingDefinitionsOSS)
+
+def checkOSSRecsPastDate(timeStamp,ossRecordings):
+    #Goal of this function is to check whether there are any recordings that have been scheduled greater than a certain timeframe
     count = 0
-    try: 
+    try:
         recordingLength = len(ossRecordings)
-    except: 
-        return 
-        pass 
-    
-    for eachOSS in ossRecordings: 
+    except:
+        return
+        pass
+
+    for eachOSS in ossRecordings:
         ossTimeStamp = eachOSS['Time']
-        if timeDelta(timeStamp,ossTimeStamp) > 0: 
+        if timeDelta(timeStamp,ossTimeStamp) > 0:
             count += 1
-    if count > 0: 
-        
+    if count > 0:
+
         print("This account has " + str(recordingLength) + " but has recordings that are not past the 18th")
-        
-        return 
+
+        return
 def main(): 
     testResults = [] 
-    envs = ['prodc']
+    envs = ['proda']
     
     sanityData = SanityData() #Class to hold    all of the sanity data 
     
-    for env in envs: 
+    for env in envs:
         
         if env == 'proda': 
             DVRVersion = "S96"
@@ -1313,54 +1398,55 @@ def main():
         elif env == 'prodc': 
             DVRVersion = "S116" 
             
-        try: 
-            testAPICall('bellggvoice369',env,sanityData)
-        except: 
-            pass
+
         
         print("Running test cases for", env)
         
         _feature_group = "NAPA_TRIAL"
     
-        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
-        
-        #accountsInFeatureGroup = ['napaclient40'] 
+        accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)
+
+        #accountsInFeatureGroup = ['8452000000000012']
         #accountsInFeatureGroup = ['ucclient20']
 
         featureGroupLen = len(accountsInFeatureGroup)
         
         for eachAccount in accountsInFeatureGroup:
-            
+
+            try:
+                testAPICall(eachAccount, env, sanityData)
+            except:
+                pass
 
             try:
                 OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
-            except: 
-                OSSRecs = None 
-                pass
-            
-            try: 
-                accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic 
-            except: 
-                pass 
-            try: 
-                checkDeviceSettings(eachAccount,env,sanityData)
-            except: 
-                pass 
-            
-            #Check to see if any of the DVR PRoxy Definitions are okay 
-            try: 
-                if OSSRecs != None: 
-                    performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,DVRVersion) 
+            except:
+            #    OSSRecs = None
+            #   pass
+
+            try:
+                accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic
             except:
                 pass
-            
-        innerRow = {} 
-        
+            try:
+                checkDeviceSettings(eachAccount,env,sanityData)
+            except:
+                pass
+
+            #Check to see if any of the DVR PRoxy Definitions are okay
+            try:
+                if OSSRecs != None:
+                    performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,DVRVersion)
+            except:
+                pass
+
+        innerRow = {}
+
         results_p = processResults(sanityData,featureGroupLen)
         innerRow['Environment'] = results_p
         testResults.append(results_p)
-        
-        print(testResults) 
+
+        print(testResults)
         print("\n")
     return testResults
 

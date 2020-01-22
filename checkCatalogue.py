@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 15 15:42:58 2020
+
+@author: Me
+"""
+
 
 # -*- coding: utf-8 -*-
 """
@@ -282,10 +289,98 @@ def getAccounts_FeatureGroup(_feature_group,env):
             break 
 
     return allAccounts 
+def checkCatalogue(recs): 
+    def mf_get_title(_uid, token, _env):
+    uid = str(_uid)
+    env = str(_env)
+    # print('==> Getting title: ' + str(uid) +'\n')
+    url = "https://appgw-client-a." + env + ".bce.tv3cloud.com/S96/discovery/v3/programs/" + uid
+    # print("URL: " + url)
+    # try:
+    # augmented_data = mf_get_op_data(uid)
+    # popularity = augmented_data['popularity']
+    # mf_imagestatus = augmented_data['mf_imagestatus']
+    # try:
+    # mf_matchstatus = augmented_data['mf_matchstatus']
+    # except:
+    # mf_matchstatus = "Err"
+    # except:
+    # popularity = -1
+    # try:
+    response = session.get(url)  # , headers=token
+    try:
+        rj = response.json()
+        # print(rj)
+        try:
+            description = rj['Description']
+        except:
+            description = ""
+        try:
+            seriesid = rj['SeriesId']
+        except:
+            seriesid = "Error"
+        try:
+            title = rj['Name']
+        except:
+            title = "Error"
+        try:
+            inferred_oad = rj['OriginalAirDate']
+        except:
+            inferred_oad = "Error"
+        try:
+            inferred_language = rj['Locale']
+        except:
+            inferred_language = "Error"
+        try:
+            inferred_rating = rj['Ratings'][0]['Value']
+        except:
+            inferred_rating = "Error"
+        try:
+            episode_title = rj['EpisodeName']
+        except:
+            episode_title = ""
+        try:
+            images = rj['Images']
+        except:
+            images = []
+        try:
+            supported_images = rj['SupportedImages']
+        except:
+            supported_images = []
+        res = {
+            "inferred_k121": seriesid,
+            "inferred_title": title,
+            "inferred_episode_title": episode_title,
+            "inferred_oad": inferred_oad,
+            "inferred_language": inferred_language,
+            "inferred_rating": inferred_rating,
+            "inferred_description": description,
+            "mf_images": images,
+            "SupportedImages": supported_images
+            # "mf_popularity": popularity,
+            # "mf_imagestatus": mf_imagestatus,
+            # "mf_matchstatus": mf_matchstatus
+        }
+    except:
+        res = {
+            "inferred_k121": "Error",
+            "inferred_title": "Error",
+            "inferred_episode_title": "Error",
+            "inferred_oad": "Error",
+            "inferred_language": "Error",
+            "inferred_rating": "Error",
+            "inferred_description": "Error",
+            "mf_images": ["Error"],
+            "SupportedImages": ["Error"]
+            # "mf_popularity": "Error",
+            # "mf_imagestatus": "Error",
+            # "mf_matchstatus": "Error"
+        }
+    return res
 
 def main(): 
     
-    env = 'proda'
+    env = 'prodc'
     sanityData = SanityData() #Class to hold    all of the sanity data 
         
     print("Accounts with 503 errors: ", env)
@@ -301,7 +396,7 @@ def main():
     
     for eachAccount in accountsInFeatureGroup:
         
-        Response = mf_getRecordings('OSS',eachAccount,env)
+        Response = mf_getRecordings('OSS',eachAccount,'prodc')
         if Response == '503': 
             print(Response + " " + eachAccount)  
 
