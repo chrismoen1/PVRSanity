@@ -18,7 +18,8 @@ from requests_pkcs12 import get
 import pickle
 import requests
 import signal
-
+from os import listdir
+from os.path import isfile, join
 import signal
 import multiprocessing as mp
 import logging
@@ -699,7 +700,30 @@ def isInCatalogue(string):
             return True #It does exists
     else:
         return False
+
+def getProgramList_Schedules(programID_main,schedules):
+
+    scheduledList = []
+    for schedule in schedules:
+        #This is to loop through each of the scheduled recordings
+        programID_schedule = schedule.attrib['p']
+        if programID_schedule == programID_main:
+            try:
+                row = {}
+                timeFrame = schedule.attrib['d']
+                schedule_frame = schedule.attrib['s']
+                channelLeter = schedule.attrib['c']
+                row['Time Frame'] = timeFrame
+                row['Schedule Time'] = schedule_frame
+                row['Channel Letter'] = channelLeter
+                scheduledList.append(row)
+
+            except:
+                timeFrame = ""
+    return scheduledList #Return the list which means we have properly populated it
+
 if __name__ == '__main__':
+    allList = []
     #seq_max = mp.cpu_count()
     # seq_max = 1
     env = "proda"
@@ -710,22 +734,24 @@ if __name__ == '__main__':
     tok["MPF-AccessControl"] = "P:1,1 A:1,1 R:0,0 RT:1,0 UTL:0,0 AAP:0 BMGD:1 BMS:0 BUR:0"
 
     out_file_name = "_output.txt"
+    allPrograms = 0
+    problematic = 0
+    #epg_file = "C://Users//Me//Downloads//EPGFILES//EPGFILES//EPG_v3263-5842445530034343718.xml"
+    mypath = "C://Users//Me//Downloads//EPGFILES//EPGFILES//"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    epgNumber = 0
+    epg_file = "C://Users//Me//Desktop//EPG_v3413-7502016412994468142.xml"
 
-    epg_file = "C://Users//Me//Downloads//EPG-a44c170d-5c7f-45a0-9092-864a43aaa36a.xml"
-
-
+    #for eachFile in onlyfiles:
+        #print("Analyzing " + eachFile)
+        #currEPG = []
     with open(epg_file, 'r', encoding="UTF-8") as xmlfile:
         seq_count = 0  # set as 0->4 for a total of 5 threads
 
         tree = ET.parse(xmlfile)
         root = tree.getroot()[0]
-        for x in root:
-            if ("programs" in x.tag):
-                programs = x
-
-            elif ("schedules" in x.tag):
-                schedules = x
-
+        programs = root.find("programs")
+        schedules = root.find("schedules")
 
         ## Start with parsing programs - get all programs.
         # Look for unique episodes (k.119 != k1.121) vs generic episodes (k.119 == k.121)
@@ -733,6 +759,7 @@ if __name__ == '__main__':
 
         # stop_count = 30
         for program in programs:  # try for just 1 program)
+            allPrograms += 1
             # stop_count -= 1
             # if (stop_count == 0):
             # break
@@ -746,12 +773,14 @@ if __name__ == '__main__':
                 d = program.attrib['d'].replace("|", "/").replace('\n', '')  # get program description from GLF
             except:
                 d = ""
-            title = program.attrib['t'].replace("|", "/").replace('\n', '')  # get program title from GLF
+            try:
+                title = program.attrib['t'].replace("|", "/").replace('\n', '')  # get program title from GLF
+            except:
+                title = ""
             try:
                 episode_title = program.attrib['et'].replace("|", "/").replace('\n', '')
             except:
                 episode_title = ""
-
             try:
                 lang = str(program.attrib['l'])
             except:
@@ -764,37 +793,59 @@ if __name__ == '__main__':
 
             #now that we have a program ID, we will use that to find the list of series assets that do not exist in the catagolog
             # ----------------------------#
+            programs_scheduleList = []
+            programID_scheduleList = getProgramList_Schedules(programID_main,schedules)
+            count = -1
+            for eachEPG in onlyfiles:
+                count += 1
+                eacg = mypath + eachEPG
 
-            for el in program.iter():
-                #master = el.
-                try:
-                    k119 = el.attrib['v']
-                except:
-                    k119 = -1
-                try:
-                    idf = str(el.attrib['id'])
-                except:
-                    idf = '119'
-                if idf == '119':
+                with open(eacg, 'r', encoding="UTF-8") as eachXML:
 
-                    if k119 != -1 and isInCatalogue(k119) == False and episode_title != "":
-                        print("Show : " + episode_title + " is not in the catalog scheduled (PID): " + programID_main)
-                        if episode_title != None or episode_title != "":
-                            for schedule in schedules:
-                                try:
-                                    timeStamp = schedule.attrib['s']
-                                except:
-                                    timeStamp = None
-                                try:
-                                    programId = schedule.attrib['p']
-                                except:
-                                    programId = None
-                                if programId ==programID_main and programId != None:
-                                    #Then we have a match for that asset
-                                    #We can then look up that asset in the catalogue
-                                    print("Playing at " + timeStamp)
-                        print("-------------------------------------------------------------------")
-                            #--------------------------------------------------------------#
+                    tree1 = ET.parse(eachXML)
+                    root1 = tree1.getroot()[0]
+                    programs_eachXML = root1.find("programs")
+                    schedules_eachXMl = root1.find("schedules")
 
+                    flag = False
 
-            #pid = int(program.attrib['id'])
+                    for program_eachXML in programs_eachXML:  # try for just 1 program)
+
+                        try:
+                            programID_eachXML = program.attrib['id']
+                        except:
+                            programID_eachXML = None
+
+                        if programID_main == programID_eachXML and programID_eachXML != None:
+
+                            programID_scheduleList_eachXML = getProgramList_Schedules(programID_eachXML, schedules_eachXMl)
+
+                            #if programID_scheduleList_eachXML != programID_scheduleList:
+                            #Then we want to check each proram
+                            for eachTimeFrame in programID_scheduleList:
+                                timeFrame = eachTimeFrame['Time Frame']
+                                scheduleTime = eachTimeFrame['Schedule Time']
+                                channelLetter = eachTimeFrame['Channel Letter']
+
+                                for eachTimeFrame_XML in programID_scheduleList_eachXML:
+                                    timeFrame_XML = eachTimeFrame_XML['Time Frame']
+                                    scheduleTime_XML = eachTimeFrame_XML['Schedule Time']
+                                    channelLetter_XML = eachTimeFrame_XML['Channel Letter']
+
+                                    #print(channelLetter_XML)
+
+                                    if channelLetter == channelLetter_XML and scheduleTime == scheduleTime_XML:
+                                        #print(timeFrame_XML + " to " + timeFrame)
+                                        if timeFrame != timeFrame_XML:
+                                            print("Then the show has extended from " + timeFrame + " to " + timeFrame_XML)
+                                            problematic += 1
+
+                                #print("Then we have a discrepancy with " + programID_main  + " ON EPG # " + str(count))
+                                #print(programID_scheduleList_eachXML)
+                                #print(programID_scheduleList)
+
+                                flag = True
+                        if flag == True:
+                            break
+        print(problematic/allPrograms)
+

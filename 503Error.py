@@ -285,7 +285,7 @@ def getAccounts_FeatureGroup(_feature_group,env):
 
 def main(): 
     
-    env = 'proda'
+    env = 'prodc'
     sanityData = SanityData() #Class to hold    all of the sanity data 
         
     print("Accounts with 503 errors: ", env)

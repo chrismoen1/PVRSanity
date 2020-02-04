@@ -434,7 +434,8 @@ def getRecCount(totalTable):
             #THen we know that it is correctly matched
 def validationCheckIndividualRecs(individualRecordings,accountName): 
     #we can check the individual recordings within 
-
+    flagged_recorded = []
+    flagged_scheduled = []
     for arec in individualRecordings: 
     
         glfProgramID_a = arec['programDetailsGLF']
@@ -466,11 +467,17 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
                         #And the time_a was greater than time_b
                         print("Show was scheduled and then cancelled")
                         return 1
+
             if ep_a != 'NULL' and ep_a != 'None' and ep_b != 'None' and season_a != 'None' and season_b != 'None' and ep_b != 'NULL' and season_a != 'NULL' and season_b != 'NULL' and ep_a == ep_b and season_a == season_b and time_b != time_a and show_a == show_b and state_b ==  state_a and seriesID_b == seriesID_a: 
                 time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(' ', 'T') + 'Z'
                 if timeDelta(time_a,time_now) < 0 and timeDelta(time_b,time_now) < 0: 
                     print("Second Recording should not have happened on this account with show " + show_a + " at  " + time_a + " vs "  + time_b + " for " + accountName) 
                     
+                return 1
+
+            if glfProgramID_a == glfProgramID_b and state_a == "Recorded" and state_b == "Recorded" and time_a != time_b:
+                print("The Show " + show_a + " at " + time_a + " for " + accountName +" was duplicated as being recorded!! with GLF " + glfProgramID_b)
+                flagged_recorded.append(glfProgramID_a)
                 return 1
             #if seriesID_a == seriesID_b and glfProgramID_a != glfProgramID_a and originalAir_b != originalAir_a: 
                 #THen we have an example of a show that has an invalid program configuration xdx
@@ -1413,15 +1420,15 @@ def main():
         
         for eachAccount in accountsInFeatureGroup:
 
-            try:
-                testAPICall(eachAccount, env, sanityData)
-            except:
-                pass
+            #try:
+                #testAPICall(eachAccount, env, sanityData)
+            #except:
+                #pass
 
             try:
                 OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
             except:
-            #    OSSRecs = None
+                OSSRecs = None
             #   pass
 
             try:
