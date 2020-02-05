@@ -41,6 +41,7 @@ import re
 # setup.py
 from distutils.core import setup
 counter = 0
+
 path = "D:\\scripts\\output\\hourly_C"
 
 class SanityData:
@@ -436,8 +437,8 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
     #we can check the individual recordings within 
     flagged_recorded = []
     flagged_scheduled = []
-    for arec in individualRecordings: 
-    
+    for arec in individualRecordings:
+
         glfProgramID_a = arec['programDetailsGLF']
         seriesID_a = arec['seriesExtID'] 
         season_a = arec['Season Number'] 
@@ -446,6 +447,7 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
         time_a = arec['Time'] 
         state_a = arec['Series State'] 
         seriesID_a = arec['seriesID']
+        isSeries_a = arec['seriesObjType']
         originalAir_a = arec['originalAirDate']
         #innerRow['Season Number'] = seasonNumber 
         #innerRow['Ep'] = epNumber
@@ -459,6 +461,8 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
             state_b = brec['Series State'] 
             show_b = brec['Show']
             originalAir_b = brec['originalAirDate']
+            isSeries_b = brec['seriesObjType']
+
             time_b = brec['Time'] 
             #seriesID_b = brec['seriesID']
             
@@ -475,8 +479,8 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
                     
                 return 1
 
-            if glfProgramID_a == glfProgramID_b and state_a == "Recorded" and state_b == "Recorded" and time_a != time_b:
-                print("The Show " + show_a + " at " + time_a + " for " + accountName +" was duplicated as being recorded!! with GLF " + glfProgramID_b)
+            if glfProgramID_b != None and glfProgramID_b != "NULL" and glfProgramID_a == glfProgramID_b and state_a == "Recorded" and state_b == "Recorded" and time_a != time_b and isSeries_b == 'Series' and isSeries_a == 'Series':
+                print("The Show " + show_a + " at " + time_a + " vs " + time_b + " for " + accountName +" was duplicated as being recorded!! with GLF " + glfProgramID_b)
                 flagged_recorded.append(glfProgramID_a)
                 return 1
             #if seriesID_a == seriesID_b and glfProgramID_a != glfProgramID_a and originalAir_b != originalAir_a: 
@@ -494,6 +498,7 @@ def valCheckIndRecordings_GLF(individualRecordings):
 def validationCheckFakeIds(individualRecordings,accountName): 
     #Check the fake IDS of the recordings to ensure that there is no episodes that are incorrectly matched 
     for eachRec in individualRecordings:
+
         #Check to see whether or not the 
         programDetailsGeneric = eachRec['isGeneric']
         fake = eachRec['seriesExtID'] 
@@ -511,7 +516,7 @@ def checkSeriesValidation(recs,individualRecordings,seriesDetailObj,accountName,
     valDVRIds = 0
     
     valMissingIDs = validationCheckMissingIDS(recs) 
-    valIndRecs = validationCheckIndividualRecs(individualRecordings,accountName)  
+
     valImages = validationCheckImages(_type,seriesDetailObj)
     valDVRIds = validationCheckDVRIds(_type,seriesDetailObj)
     #valFakeMatch = validationCheckFakeIds(individualRecordings,accountName) 
@@ -520,7 +525,7 @@ def checkSeriesValidation(recs,individualRecordings,seriesDetailObj,accountName,
    # sanityData.setAll(valMissingIDs, valIndRecs,valImages,valDVRIds) 
    
     sanityData.setValMissingIDS(valMissingIDs)
-    sanityData.setValIndRecs(valIndRecs) 
+
     sanityData.setValImages(valImages) 
     sanityData.setValDVRIds(valDVRIds) 
     
@@ -974,7 +979,11 @@ def mf_getRecordings(typeCALL,accountName,env,sanityData,DVRVersion):
         if skipToken == None or skipToken == "": 
             break
     #checkCatalogue(individualRecordings,tok,env,accountName)
-    #print(len(individualRecordings))    
+    #print(len(individualRecordings))
+    valIndRecs = 0
+    valIndRecs = validationCheckIndividualRecs(individualRecordings, accountName)
+
+    sanityData.setValIndRecs(valIndRecs)
     return individualRecordings #return the Total Table of all recordings
 
 def get_size(start_path):
@@ -1001,7 +1010,7 @@ def printTestCase(sentence, number):
         passed = colored("Failed", "red") 
         print(sentence + " COUNT: " + str(number) + " " + passed ) 
 
-def processResults(sanityData,featureGroupLen): 
+def processResults(sanityData,featureGroupLen,TOTALSHOWS):
     #Process the accounts 
     js = []
     '''
@@ -1057,12 +1066,12 @@ def processResults(sanityData,featureGroupLen):
         results = 0
     
     print("Summary of Results")
-    
+    print("Total Shows Counted: ",TOTALSHOWS)
     print("--------------------------------------------------------------------------------")
     printTestCase("Test Case 1: Number of Occurences of missing sections in JSON [MFR-8980]", valMissingIDs_program)
     js.append({"Test Case 1: Number of Occurences of missing sections in JSON [MFR-8980]": valMissingIDs_program})
     
-    printTestCase("Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]", valIndRecs_program)
+    printTestCase("Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]",  valIndRecs_program)
     js.append({"Test Case 2: Number of Occurences of recordings that were scheduled and duplicated with the same episode [MFR-4380]": valIndRecs_program})
     
     #printTestCase("Test Case 3: Number of Occurences of missing image data ", valImages_program)
@@ -1395,7 +1404,7 @@ def main():
     envs = ['proda']
     
     sanityData = SanityData() #Class to hold    all of the sanity data 
-    
+    TOTALSHOWS = 0
     for env in envs:
         
         if env == 'proda': 
@@ -1413,7 +1422,7 @@ def main():
     
         accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)
 
-        #accountsInFeatureGroup = ['8452000000000012']
+        #accountsInFeatureGroup = ['8452000000000003']
         #accountsInFeatureGroup = ['ucclient20']
 
         featureGroupLen = len(accountsInFeatureGroup)
@@ -1427,10 +1436,10 @@ def main():
 
             try:
                 OSSRecs = mf_getRecordings('OSS',eachAccount,env,sanityData,DVRVersion)
+                TOTALSHOWS += len(OSSRecs)
             except:
                 OSSRecs = None
             #   pass
-
             try:
                 accountConfigurationVal = checkAccountSettings(eachAccount,env,sanityData)#Query the account settings where something could potentially be problematic
             except:
@@ -1449,7 +1458,7 @@ def main():
 
         innerRow = {}
 
-        results_p = processResults(sanityData,featureGroupLen)
+        results_p = processResults(sanityData,featureGroupLen,TOTALSHOWS)
         innerRow['Environment'] = results_p
         testResults.append(results_p)
 

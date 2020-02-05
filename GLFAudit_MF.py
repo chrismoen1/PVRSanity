@@ -756,7 +756,61 @@ if __name__ == '__main__':
         ## Start with parsing programs - get all programs.
         # Look for unique episodes (k.119 != k1.121) vs generic episodes (k.119 == k.121)
         #programs = root.find("programs")
+        for schedule in schedules:
+            # This is to loop through each of the scheduled recordings
+            try:
+                programID_schedule = schedule.attrib['p']
+            except:
+                programID_schedule = None
+            try:
+                timeFrame = schedule.attrib['s']
+            except:
+                timeFrame = None
+            try:
+                showLength = schedule.attrib['d']
+            except:
+                showLength = None
+            try:
+                channel = schedule.attrib['c']
+            except:
+                channel = None
 
+            for eachEPG in onlyfiles:
+
+                eacg = mypath + eachEPG
+
+                with open(eacg, 'r', encoding="UTF-8") as eachXML:
+                    tree1 = ET.parse(eachXML)
+                    root1 = tree1.getroot()[0]
+                    schedules_eachXMl = root1.find("schedules")
+
+                    for schedule_eachXMl in schedules_eachXMl:
+                        try:
+                            programID_schedule_xml = schedule_eachXMl.attrib['p']
+                        except:
+                            programID_schedule_xml = None
+                        try:
+                            timeFrame_xml = schedule_eachXMl.attrib['s']
+                        except:
+                            timeFrame_xml = None
+                        try:
+                            showLength_xml = schedule_eachXMl.attrib['d']
+                        except:
+                            showLength_xml = None
+                        try:
+                            channel_xml = schedule_eachXMl.attrib['c']
+                        except:
+                            channel_xml = None
+
+                        if channel_xml == channel and timeFrame == timeFrame_xml and programID_schedule != programID_schedule_xml:
+
+                            #Then we have found a match
+                            print("This show has changed time slog on channel " + channel + " now holding program " + programID_schedule_xml + " at time: " + timeFrame)
+
+
+
+
+        '''
         # stop_count = 30
         for program in programs:  # try for just 1 program)
             allPrograms += 1
@@ -823,6 +877,7 @@ if __name__ == '__main__':
                             #if programID_scheduleList_eachXML != programID_scheduleList:
                             #Then we want to check each proram
                             for eachTimeFrame in programID_scheduleList:
+
                                 timeFrame = eachTimeFrame['Time Frame']
                                 scheduleTime = eachTimeFrame['Schedule Time']
                                 channelLetter = eachTimeFrame['Channel Letter']
@@ -832,20 +887,10 @@ if __name__ == '__main__':
                                     scheduleTime_XML = eachTimeFrame_XML['Schedule Time']
                                     channelLetter_XML = eachTimeFrame_XML['Channel Letter']
 
-                                    #print(channelLetter_XML)
-
-                                    if channelLetter == channelLetter_XML and scheduleTime == scheduleTime_XML:
-                                        #print(timeFrame_XML + " to " + timeFrame)
-                                        if timeFrame != timeFrame_XML:
-                                            print("Then the show has extended from " + timeFrame + " to " + timeFrame_XML)
-                                            problematic += 1
-
-                                #print("Then we have a discrepancy with " + programID_main  + " ON EPG # " + str(count))
-                                #print(programID_scheduleList_eachXML)
-                                #print(programID_scheduleList)
-
                                 flag = True
+                                
                         if flag == True:
                             break
         print(problematic/allPrograms)
 
+'''
