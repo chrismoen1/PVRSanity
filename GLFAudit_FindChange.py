@@ -27,6 +27,8 @@ import os
 
 session = requests.Session()
 match_op = False
+
+
 # requests.adapters.DEFAULT_RETRIES = 1
 
 
@@ -161,18 +163,18 @@ def mf_map_program(pid, token, _env):
 def get_mf_image_status(_url, _filename=None, _env=None):
     # modified Jan 16, 2020
     # modified to download image and save it to a directory.  Filename is (UID)-(filename).jpg
-    if _filename == None or _env==None:
+    if _filename == None or _env == None:
         response = session.head(_url)
     else:
-        filename = os.getcwd()+"\\"+str(_env)+"\\"+str(_filename)
+        filename = os.getcwd() + "\\" + str(_env) + "\\" + str(_filename)
         response = session.get(_url, stream=True)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
-            except OSError as exc: # Guard against race condition
+            except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-        output = open(filename,"wb")
+        output = open(filename, "wb")
         output.write(response.raw.read())
         output.close()
     code = response.status_code
@@ -553,7 +555,8 @@ def mf_map_program_parallel(seq_number, tok, date_str, env, past_ver):
             for size in res_images:
                 count_images += 1
                 # code = -1
-                code = get_mf_image_status(res_images[size], str(k119+"-"+str(size)+".jpg"), env) # modified Jan 16, 2020 to add saving files to disk
+                code = get_mf_image_status(res_images[size], str(k119 + "-" + str(size) + ".jpg"),
+                                           env)  # modified Jan 16, 2020 to add saving files to disk
                 if int(code) != int(200):
                     count_fails += 1
                     tally_failed += 1
@@ -638,6 +641,7 @@ def mf_map_program_parallel(seq_number, tok, date_str, env, past_ver):
             ret = mytab.update_one({"_id": docid}, {"$set": update_data})
     return
 
+
 def isInCatalogue(string):
     tok = get_token('OSS', 'proda', list())
     hex = string.encode('utf-8').hex()
@@ -697,15 +701,15 @@ def isInCatalogue(string):
                 showName = rj['Name']
             except:
                 showName = "test"
-            return True #It does exists
+            return True  # It does exists
     else:
         return False
 
-def getProgramList_Schedules(programID_main,schedules):
 
+def getProgramList_Schedules(programID_main, schedules):
     scheduledList = []
     for schedule in schedules:
-        #This is to loop through each of the scheduled recordings
+        # This is to loop through each of the scheduled recordings
         programID_schedule = schedule.attrib['p']
         if programID_schedule == programID_main:
             try:
@@ -720,31 +724,46 @@ def getProgramList_Schedules(programID_main,schedules):
 
             except:
                 timeFrame = ""
-    return scheduledList #Return the list which means we have properly populated it
+    return scheduledList  # Return the list which means we have properly populated it
+def getSchedules_xml(onlyFiles):
+    mypath = "C://Users//Me//Downloads//EPGFILES//EPGFILES//"
+    schedules_xmlList = []
+    for eachEPG in onlyFiles:
+        eacg = mypath + eachEPG
+        with open(eacg, 'r', encoding="UTF-8") as eachXML:
+            tree1 = ET.parse(eachXML)
+            root1 = tree1.getroot()[0]
+            schedules_eachXMl = root1.find("schedules")
+            schedules_xmlList.append(schedules_eachXMl)
+
+    return schedules_xmlList
 
 if __name__ == '__main__':
     allList = []
-    #seq_max = mp.cpu_count()
+    # seq_max = mp.cpu_count()
     # seq_max = 1
     env = "proda"
     print("Using environment: " + str(env))
 
-    tok = get_token('OSS',env, list())
+    tok = get_token('OSS', env, list())
     tok["User-Agent"] = "Microsoft-IPTV-Client/1.6 (Linux; Mediaroom 1.1.2402.5090; MPF 1.1; MPF 3.0; MediaFirst; DVR; ARRIS; VIP5662W; HEVC)"
     tok["MPF-AccessControl"] = "P:1,1 A:1,1 R:0,0 RT:1,0 UTL:0,0 AAP:0 BMGD:1 BMS:0 BUR:0"
 
     out_file_name = "_output.txt"
     allPrograms = 0
     problematic = 0
-    #epg_file = "C://Users//Me//Downloads//EPGFILES//EPGFILES//EPG_v3263-5842445530034343718.xml"
+    # epg_file = "C://Users//Me//Downloads//EPGFILES//EPGFILES//EPG_v3263-5842445530034343718.xml"
     mypath = "C://Users//Me//Downloads//EPGFILES//EPGFILES//"
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+    allScheds_xml = getSchedules_xml(onlyfiles)
+
     epgNumber = 0
     epg_file = "C://Users//Me//Desktop//EPG_v3413-7502016412994468142.xml"
 
-    #for eachFile in onlyfiles:
-        #print("Analyzing " + eachFile)
-        #currEPG = []
+    # for eachFile in onlyfiles:
+    # print("Analyzing " + eachFile)
+    # currEPG = []
     with open(epg_file, 'r', encoding="UTF-8") as xmlfile:
         seq_count = 0  # set as 0->4 for a total of 5 threads
 
@@ -755,7 +774,7 @@ if __name__ == '__main__':
 
         ## Start with parsing programs - get all programs.
         # Look for unique episodes (k.119 != k1.121) vs generic episodes (k.119 == k.121)
-        #programs = root.find("programs")
+        # programs = root.find("programs")
         for schedule in schedules:
             # This is to loop through each of the scheduled recordings
             try:
@@ -779,12 +798,9 @@ if __name__ == '__main__':
 
                 eacg = mypath + eachEPG
 
-                with open(eacg, 'r', encoding="UTF-8") as eachXML:
-                    tree1 = ET.parse(eachXML)
-                    root1 = tree1.getroot()[0]
-                    schedules_eachXMl = root1.find("schedules")
+                for _xml_schedule in allScheds_xml:
 
-                    for schedule_eachXMl in schedules_eachXMl:
+                    for schedule_eachXMl in _xml_schedule:
                         try:
                             programID_schedule_xml = schedule_eachXMl.attrib['p']
                         except:
@@ -803,9 +819,8 @@ if __name__ == '__main__':
                             channel_xml = None
 
                         if channel_xml == channel and timeFrame == timeFrame_xml and programID_schedule != programID_schedule_xml:
-
-                            #Then we have found a match
-                            print("This show has changed time slog on channel " + channel + " now holding program " + programID_schedule_xml + " at time: " + timeFrame)
+                            # Then we have found a match
+                            print("This show has changed time slog on channel " + channel + " now holding program " + programID_schedule_xml + " at time: " + timeFrame + " with EPG " + eachEPG)
 
         '''
         # stop_count = 30
@@ -885,7 +900,7 @@ if __name__ == '__main__':
                                     channelLetter_XML = eachTimeFrame_XML['Channel Letter']
 
                                 flag = True
-                                
+
                         if flag == True:
                             break
         print(problematic/allPrograms)

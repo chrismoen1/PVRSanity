@@ -10,7 +10,7 @@ Created on Thu Oct 17 16:14:00 2019
 """
 Created on Wed Oct 16 16:37:39 2019
 
-@author: Chris Moen
+@author: Chris Moen 746D73ThirdParty5348303031363833393830303030_Series
 """
 
 
@@ -285,16 +285,16 @@ def getAccounts_FeatureGroup(_feature_group,env):
 
 def main(): 
     
-    env = 'prodc'
+    env = 'prodb'
     sanityData = SanityData() #Class to hold    all of the sanity data 
         
     print("Accounts with 503 errors: ", env)
     
     _feature_group = "NAPA_TRIAL"
 
-    accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)    
+    accountsInFeatureGroup = getAccounts_FeatureGroup(_feature_group,env)
     
-    #accountsInFeatureGroup = ['napaclient9'] 
+    #accountsInFeatureGroup = ['napaclient171']
     #accountsInFeatureGroup = ['ucclient20']
 
     #featureGroupLen = len(accountsInFeatureGroup)
@@ -303,6 +303,6 @@ def main():
         
         Response = mf_getRecordings('OSS',eachAccount,env)
         if Response == '503': 
-            print(Response + " " + eachAccount)  
+            print(Response + " " + eachAccount)
 
 main() #Return the Test Results 

@@ -480,7 +480,8 @@ def validationCheckIndividualRecs(individualRecordings,accountName):
                 return 1
 
             if glfProgramID_b != None and glfProgramID_b != "NULL" and glfProgramID_a == glfProgramID_b and state_a == "Recorded" and state_b == "Recorded" and time_a != time_b and isSeries_b == 'Series' and isSeries_a == 'Series':
-                print("The Show " + show_a + " at " + time_a + " vs " + time_b + " for " + accountName +" was duplicated as being recorded!! with GLF " + glfProgramID_b)
+                #if "2020" in time_a == True or "2020" in time_b == True:
+                print("Show: " + show_a + "| Time: "  + time_b + "|Account: " + accountName +"|GLFProgram: " + glfProgramID_b)
                 flagged_recorded.append(glfProgramID_a)
                 return 1
             #if seriesID_a == seriesID_b and glfProgramID_a != glfProgramID_a and originalAir_b != originalAir_a: 
@@ -1132,10 +1133,10 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
         dvrShowName = eachDVR['Show']
 
         if dvrShowName == "NULL" or dvrShowName == None or dvrShowName == "" or dvrShowName ==  "* ERROR * NULL Recordings Object" and re.match('8455',accountName):
-            print("This show has empty program detail information (DVR) " + accountName)
+            #print("This show has empty program detail information (DVR) " + accountName)
             sanityData.setDVREmptyData(1)
         if dvrProgId == None or dvrProgId == "NULL" or dvrProgId == "" or dvrProgId == 'None' and re.match('8455',accountName):
-            print("This show has an empty program ID on account (DVR) ", accountName)
+            #print("This show has an empty program ID on account (DVR) ", accountName)
             sanityData.setDVREmptyData(1)
 
             for eachOSS in OSSRecs:
@@ -1145,10 +1146,10 @@ def checkDVREmpty(DVRRECS,OSSRecs,sanityData,accountName):
                     startTime = eachOSS['Time']
                     channelNumber = eachOSS['Channel Number']
                     break
-            try:
-                print("This Show is Empty "+ showName + " " + startTime + " on channel " + str(channelNumber) + " on " + accountName)
-            except:
-                pass
+            #try:
+                #print("This Show is Empty "+ showName + " " + startTime + " on channel " + str(channelNumber) + " on " + accountName)
+            #except:
+                #pass
 def performDVRProxySanity(eachAccount, OSSRecs,env,sanityData,dvrVersion): 
     #Perform a sanity based on the recordings of the OSS Definitions
     DVRRECS = mf_getRecordings('DVRPROXY',eachAccount,env,sanityData,dvrVersion)
